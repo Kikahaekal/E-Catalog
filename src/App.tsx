@@ -1,5 +1,17 @@
 import { Navigate, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
+import { 
+  IonApp, 
+  IonRouterOutlet, 
+  setupIonicReact,
+  IonMenu,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonList,
+  IonItem,
+  IonLabel
+} from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 
@@ -19,15 +31,7 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
+/* Ionic Dark Mode */
 import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
@@ -38,7 +42,30 @@ setupIonicReact();
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <IonRouterOutlet>
+      {/* kesini */}
+      <IonMenu contentId="main-content">
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Menu Utama</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonList>
+            <IonItem routerLink="/home" routerDirection="none">
+              <IonLabel>Home</IonLabel>
+            </IonItem>
+
+            {/* belum ada halamannya */}
+            <IonItem routerLink="/" routerDirection="none">
+              <IonLabel>Form Tambah Ikan</IonLabel>
+            </IonItem>
+
+            {/* nanti tambah menu lain disini */}
+          </IonList>
+        </IonContent>
+      </IonMenu>
+
+      <IonRouterOutlet id="main-content">
         <Route path="/home" element={<Home />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
       </IonRouterOutlet>
