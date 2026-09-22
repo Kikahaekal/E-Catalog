@@ -1,0 +1,7 @@
+{
+  "name": "ensiklopedia_perikanan",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
