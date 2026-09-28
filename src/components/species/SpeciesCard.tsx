@@ -21,16 +21,9 @@ import {
   IonCardSubtitle,
   IonCardContent,
 } from '@ionic/react';
-import { Species, StatusTangkap } from '../../models/Species';
+import { Species } from '../../models/Species';
+import { labelStatus } from '../../services/speciesService';
 import './SpeciesCard.css';
-
-// Penghubung antara kode status dan teks yang ditampilkan ke pengguna
-const labelStatus: { [key in StatusTangkap]: string } = {
-  "hijau": "Aman ditangkap",
-  "kuning": "Perlu perhatian",
-  "merah": "Tidak boleh / rawan",
-  "belum-ada": "Belum ada data",
-};
 
 // Props = data yang diterima komponen ini dari luar
 // (seperti formulir yang harus diisi sebelum diserahkan)
@@ -40,7 +33,8 @@ interface SpeciesCardProps {
 
 const SpeciesCard: React.FC<SpeciesCardProps> = ({ species }) => {
   return (
-    <IonCard>
+    // routerLink membuat kartu bisa diklik dan berpindah halaman ke /species/{id}
+    <IonCard routerLink={`/species/${species.id}`} button={true}>
       <IonCardHeader>
         {/* Nama ilmiah selalu dicetak miring (konvensi biologi) */}
         <IonCardTitle className="nama-ilmiah">

@@ -1,11 +1,12 @@
 /* Nama ilmiah selalu miring sesuai konvensi penulisan biologi */
 .nama-ilmiah {
     font-style: italic;
+    color: var(--ion-text-color);
 }
 
-/* Teks family berwarna abu supaya tidak terlalu mencolok */
+/* Teks family memakai variabel Ionic agar menyesuaikan tema terang/gelap */
 .family-text {
-    color: #666;
+    color: var(--ion-color-step-600, #888888);
     margin-bottom: 8px;
 }
 
@@ -26,9 +27,10 @@
     flex-shrink: 0;
 }
 
-/* Teks label status */
+/* Teks label status mengikuti warna teks tema */
 .status-label {
     font-size: 0.9rem;
+    color: var(--ion-text-color);
 }
 
 /* === Warna titik sesuai status tangkap === */
