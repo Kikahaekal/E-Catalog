@@ -14,6 +14,7 @@ import {
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
+import SearchResults from './pages/search/SearchResults';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -67,6 +68,7 @@ const App: React.FC = () => (
 
       <IonRouterOutlet id="main-content">
         <Route path="/home" element={<Home />} />
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
       </IonRouterOutlet>
     </IonReactRouter>

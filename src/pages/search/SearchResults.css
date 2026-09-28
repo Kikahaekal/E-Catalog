@@ -1,0 +1,32 @@
+/* Header halaman pencarian */
+.search-header {
+    margin-bottom: 8px;
+}
+
+.search-header h2 {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+/* Teks jumlah hasil pencarian */
+.search-count {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Pesan saat tidak ada ikan yang cocok */
+.tidak-ditemukan {
+    text-align: center;
+    padding: 48px 16px;
+    color: #999;
+}
+
+.tidak-ditemukan h2 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.tidak-ditemukan p {
+    font-size: 0.95rem;
+}

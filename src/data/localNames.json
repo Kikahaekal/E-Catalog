@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "speciesId": 1,
+    "nama": "Sebarat",
+    "daerah": ""
+  },
+  {
+    "id": 2,
+    "speciesId": 2,
+    "nama": "Selaya",
+    "daerah": ""
+  },
+  {
+    "id": 3,
+    "speciesId": 3,
+    "nama": "Tokak",
+    "daerah": ""
+  },
+  {
+    "id": 4,
+    "speciesId": 4,
+    "nama": "Ponggu",
+    "daerah": ""
+  },
+  {
+    "id": 5,
+    "speciesId": 5,
+    "nama": "Ketambak",
+    "daerah": ""
+  },
+  {
+    "id": 6,
+    "speciesId": 2,
+    "nama": "Kepe-kepe",
+    "daerah": ""
+  },
+  {
+    "id": 7,
+    "speciesId": 3,
+    "nama": "Kakapan",
+    "daerah": ""
+  },
+  {
+    "id": 8,
+    "speciesId": 4,
+    "nama": "Comber",
+    "daerah": ""
+  },
+  {
+    "id": 9,
+    "speciesId": 5,
+    "nama": "Lencam",
+    "daerah": ""
+  }
+]

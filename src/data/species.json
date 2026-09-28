@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "namaIlmiah": "Chaetodermis penicilligerus",
+    "family": "Monacanthidae",
+    "genus": "Chaetodermis",
+    "spesies": "penicilligerus",
+    "namaUmum": "Prickly leatherjacket",
+    "statusIUCN": "LC",
+    "statusTangkap": "hijau",
+    "wpp": [],
+    "foto": []
+  },
+  {
+    "id": 2,
+    "namaIlmiah": "Chelmon rostratus",
+    "family": "Chaetodontidae",
+    "genus": "Chelmon",
+    "spesies": "rostratus",
+    "namaUmum": "Copperband butterflyfish",
+    "statusIUCN": "LC",
+    "statusTangkap": "hijau",
+    "wpp": [],
+    "foto": []
+  },
+  {
+    "id": 3,
+    "namaIlmiah": "Choerodon anchorago",
+    "family": "Labridae",
+    "genus": "Choerodon",
+    "spesies": "anchorago",
+    "namaUmum": "Orange-dotted tuskfish",
+    "statusIUCN": "LC",
+    "statusTangkap": "hijau",
+    "wpp": [],
+    "foto": []
+  },
+  {
+    "id": 4,
+    "namaIlmiah": "Serranus cabrilla",
+    "family": "Serranidae",
+    "genus": "Serranus",
+    "spesies": "cabrilla",
+    "namaUmum": "Comber",
+    "statusIUCN": "LC",
+    "statusTangkap": "belum-ada",
+    "wpp": [],
+    "foto": []
+  },
+  {
+    "id": 5,
+    "namaIlmiah": "Lethrinus lentjan",
+    "family": "Lethrinidae",
+    "genus": "Lethrinus",
+    "spesies": "lentjan",
+    "namaUmum": "Pink ear emperor",
+    "statusIUCN": "LC",
+    "statusTangkap": "belum-ada",
+    "wpp": [],
+    "foto": []
+  }
+]

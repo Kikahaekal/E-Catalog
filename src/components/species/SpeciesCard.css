@@ -1,0 +1,54 @@
+/* Nama ilmiah selalu miring sesuai konvensi penulisan biologi */
+.nama-ilmiah {
+    font-style: italic;
+}
+
+/* Teks family berwarna abu supaya tidak terlalu mencolok */
+.family-text {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+/* Wadah status tangkap: titik warna di samping teks */
+.status-tangkap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* Titik bulat kecil penanda status */
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Teks label status */
+.status-label {
+    font-size: 0.9rem;
+}
+
+/* === Warna titik sesuai status tangkap === */
+
+/* Hijau: aman ditangkap */
+.status-hijau {
+    background-color: #22c55e;
+}
+
+/* Kuning: perlu perhatian */
+.status-kuning {
+    background-color: #eab308;
+}
+
+/* Merah: tidak boleh / rawan */
+.status-merah {
+    background-color: #ef4444;
+}
+
+/* Abu-abu: belum ada data */
+.status-belum-ada {
+    background-color: #9ca3af;
+}
