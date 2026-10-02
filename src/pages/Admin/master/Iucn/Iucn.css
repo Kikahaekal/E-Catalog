@@ -1,0 +1,71 @@
+.iucn-searchbar {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 16px;
+}
+
+/* Container untuk header dan tombol tambah */
+.iucn-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Judul halaman */
+.iucn-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* State Loading & Error / Data Kosong */
+.iucn-loading-container {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.iucn-message-container {
+  padding: 16px 0;
+}
+
+/* Tabel */
+.iucn-table-wrapper {
+  overflow-x: auto;
+}
+
+.iucn-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.iucn-table-header-row {
+  border-bottom: 2px solid var(--ion-color-light-shade);
+}
+
+.iucn-table-row {
+  border-bottom: 1px solid var(--ion-color-light-tint);
+}
+
+.iucn-table-th,
+.iucn-table-td {
+  padding: 12px 8px;
+}
+
+/* Class utilitas untuk text alignment */
+.iucn-text-center {
+  text-align: center;
+}
+
+/* Form */
+.iucn-form-item {
+  margin-top: 12px;
+}
+
+.iucn-form-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

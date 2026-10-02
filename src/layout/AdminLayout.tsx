@@ -12,20 +12,19 @@ import {
 import React from 'react';
 import './Layout.css';
 
-interface MainLayoutProps {
+interface AdminLayoutProps {
     children: React.ReactNode;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
                     <IonButtons slot="start">
                         {/* ion menu button nyambung ke app.tsx */}
-                        <IonMenuButton menu="main-menu"/>
+                        <IonMenuButton menu="admin-menu"/>
                     </IonButtons>
-                    <IonSearchbar placeholder="Cari nama ikan lokal..." animated={true}></IonSearchbar>
                 </IonToolbar>
             </IonHeader>
 

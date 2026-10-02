@@ -1,0 +1,71 @@
+.species-searchbar {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 16px;
+}
+
+/* Container untuk header dan tombol tambah */
+.species-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Judul halaman */
+.species-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* State Loading & Error / Data Kosong */
+.species-loading-container {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.species-message-container {
+  padding: 16px 0;
+}
+
+/* Tabel */
+.species-table-wrapper {
+  overflow-x: auto;
+}
+
+.species-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.species-table-header-row {
+  border-bottom: 2px solid var(--ion-color-light-shade);
+}
+
+.species-table-row {
+  border-bottom: 1px solid var(--ion-color-light-tint);
+}
+
+.species-table-th,
+.species-table-td {
+  padding: 12px 8px;
+}
+
+/* Class utilitas untuk text alignment */
+.species-text-center {
+  text-align: center;
+}
+
+/* Form */
+.species-form-item {
+  margin-top: 12px;
+}
+
+.species-form-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

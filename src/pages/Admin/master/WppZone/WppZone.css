@@ -1,0 +1,71 @@
+.wpp-searchbar {
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 16px;
+}
+
+/* Container untuk header dan tombol tambah */
+.wpp-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Judul halaman */
+.wpp-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* State Loading & Error / Data Kosong */
+.wpp-loading-container {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.wpp-message-container {
+  padding: 16px 0;
+}
+
+/* Tabel */
+.wpp-table-wrapper {
+  overflow-x: auto;
+}
+
+.wpp-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.wpp-table-header-row {
+  border-bottom: 2px solid var(--ion-color-light-shade);
+}
+
+.wpp-table-row {
+  border-bottom: 1px solid var(--ion-color-light-tint);
+}
+
+.wpp-table-th,
+.wpp-table-td {
+  padding: 12px 8px;
+}
+
+/* Class utilitas untuk text alignment */
+.wpp-text-center {
+  text-align: center;
+}
+
+/* Form */
+.wpp-form-item {
+  margin-top: 12px;
+}
+
+.wpp-form-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

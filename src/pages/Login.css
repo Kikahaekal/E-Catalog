@@ -1,0 +1,15 @@
+.form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.form-card{
+    width: 30%;
+}
+
+.btn-login{
+    margin-top: 20px;
+    width: 100%;
+}
