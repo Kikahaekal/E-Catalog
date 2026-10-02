@@ -1,0 +1,43 @@
+.species-search-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.species-search-page h1 {
+  margin: 8px 0 6px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.species-search-query {
+  margin: 0 0 18px;
+  color: var(--ion-color-medium);
+}
+
+.species-search-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.species-search-list {
+  margin-top: 12px;
+  background: transparent;
+}
+
+.species-search-result {
+  --padding-start: 16px;
+  --inner-padding-end: 12px;
+}
+
+.species-search-result h2 {
+  margin: 4px 0 6px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.species-search-result p {
+  margin: 4px 0;
+  white-space: normal;
+}

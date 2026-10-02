@@ -64,7 +64,9 @@ export const getSpecies = async (speciesId: string | number): Promise<SpeciesRes
     return response.data;
 }
 
-export const getAllSpecies = async (): Promise<SpeciesListResponse> => {
-    const response = await apiClient.get("/api/species");
+export const getAllSpecies = async (name?: string): Promise<SpeciesListResponse> => {
+    const response = await apiClient.get("/api/species", {
+        params: name ? { name } : undefined
+    });
     return response.data;
 }

@@ -44,6 +44,8 @@ import IucnPage from './pages/Admin/master/Iucn/Iucn';
 import RegencyPage from './pages/Admin/master/Regency/Regency';
 import WppZonePage from './pages/Admin/master/WppZone/WppZone';
 import SpeciesPage from './pages/Admin/master/Species/Species';
+import SpeciesSearchPage from './pages/SpeciesSearch';
+import SpeciesDetailPage from './pages/SpeciesDetail';
 
 setupIonicReact();
 
@@ -109,6 +111,8 @@ const App: React.FC = () => (
 
       <IonRouterOutlet id="main-content">
         <Route path="/home" element={<Home />} />
+        <Route path="/search" element={<SpeciesSearchPage />} />
+        <Route path="/species/:speciesId" element={<SpeciesDetailPage />} />
         {/* <Route path="/tambah-ikan" element={< />} /> */}
         <Route path="/login" element={<LoginPage />}/>
         <Route path="/admin" element={
