@@ -46,6 +46,8 @@ import WppZonePage from './pages/Admin/master/WppZone/WppZone';
 import SpeciesPage from './pages/Admin/master/Species/Species';
 import SpeciesSearchPage from './pages/SpeciesSearch';
 import SpeciesDetailPage from './pages/SpeciesDetail';
+import FishSubmissionPage from './pages/FishSubmission';
+import FishSubmissionsAdminPage from './pages/Admin/FishSubmissions/FishSubmissions';
 
 setupIonicReact();
 
@@ -65,9 +67,8 @@ const App: React.FC = () => (
               <IonLabel>Home</IonLabel>
             </IonItem>
 
-            {/* belum ada halamannya */}
             <IonItem routerLink="/tambah-ikan" routerDirection="none">
-              <IonLabel>Form Tambah Ikan</IonLabel>
+              <IonLabel>Usulkan Nama Ikan</IonLabel>
             </IonItem>
 
             {/* nanti tambah menu lain disini */}
@@ -102,6 +103,9 @@ const App: React.FC = () => (
             <IonItem routerLink="/spesies" routerDirection="none">
               <IonLabel>Data Spesies</IonLabel>
             </IonItem>
+            <IonItem routerLink="/permintaan-ikan" routerDirection="none">
+              <IonLabel>Permintaan Nama Ikan</IonLabel>
+            </IonItem>
             <IonItem className="ion-padding-top" routerLink="/home" routerDirection="none">
               <IonLabel>Halaman Utama</IonLabel>
             </IonItem>
@@ -113,7 +117,7 @@ const App: React.FC = () => (
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<SpeciesSearchPage />} />
         <Route path="/species/:speciesId" element={<SpeciesDetailPage />} />
-        {/* <Route path="/tambah-ikan" element={< />} /> */}
+        <Route path="/tambah-ikan" element={<FishSubmissionPage />} />
         <Route path="/login" element={<LoginPage />}/>
         <Route path="/admin" element={
           <AdminRoute>
@@ -138,6 +142,11 @@ const App: React.FC = () => (
         <Route path="/spesies" element={
           <AdminRoute>
             <SpeciesPage />
+          </AdminRoute>
+        }/>
+        <Route path="/permintaan-ikan" element={
+          <AdminRoute>
+            <FishSubmissionsAdminPage />
           </AdminRoute>
         }/>
         <Route path="/" element={<Navigate to="/home" replace />} />

@@ -1,20 +1,45 @@
 import { apiClient } from "./api";
 
+export interface SpeciesPhoto {
+    id?: string | number;
+    filePath?: string;
+    url?: string;
+    imageUrl?: string;
+    photoUrl?: string;
+    path?: string;
+    src?: string;
+    alt?: string;
+    caption?: string;
+}
+
+export interface SpeciesLocalName {
+    id?: string | number;
+    name?: string;
+    localName?: string | { name?: string };
+    submittedName?: string;
+    dialect?: string | null;
+    regionNote?: string | null;
+}
+
 export interface Species {
     id: string | number;
     iucnStatusId: string | number;
     commonName: string;
     scientificName: string;
-    photos?: any[]; 
-    localNames?: any[]; 
+    photos?: SpeciesPhoto[];
+    localNames?: SpeciesLocalName[];
     regencies?: { 
+        id?: string | number;
         regency: { 
+            id?: string | number;
             name: string; 
             province: string; 
         } 
     }[];
     wppZones?: { 
+        id?: string | number;
         wppZone: { 
+            id?: string | number;
             code: string; 
             description: string; 
         } 

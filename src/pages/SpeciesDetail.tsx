@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { isAxiosError } from 'axios';
 import { IonImg, IonSpinner, IonText } from '@ionic/react';
 import { useParams } from 'react-router-dom';
 import { MainLayout } from '../layout/MainLayout';
-import { getSpecies, Species } from '../services/species';
+import { apiClient } from '../services/api';
+import { getSpecies, Species, SpeciesLocalName, SpeciesPhoto } from '../services/species';
 import './SpeciesDetail.css';
 
-const getPhotoUrl = (photo: any): string | undefined => {
-  if (typeof photo === 'string') return photo;
-  return photo?.url || photo?.imageUrl || photo?.photoUrl || photo?.path || photo?.src;
+const getPhotoUrl = (photo: SpeciesPhoto | string): string | undefined => {
+  const filePath = typeof photo === 'string'
+    ? photo
+    : photo.filePath || photo.url || photo.imageUrl || photo.photoUrl || photo.path || photo.src;
+  if (!filePath || /^(https?:|data:|blob:)/i.test(filePath)) return filePath;
+
+  const baseUrl = apiClient.defaults.baseURL?.replace(/\/+$/, '') || '';
+  return `${baseUrl}/${filePath.replace(/\\/g, '/').replace(/^\/+/, '')}`;
+};
+
+const getLocalName = (localName: SpeciesLocalName | string): string | undefined => {
+  if (typeof localName === 'string') return localName;
+  const nestedLocalName = localName.localName;
+  const nestedName = typeof nestedLocalName === 'string' ? nestedLocalName : nestedLocalName?.name;
+  return localName.name || nestedName || localName.submittedName;
 };
 
 const SpeciesDetailPage: React.FC = () => {
@@ -26,9 +40,12 @@ const SpeciesDetailPage: React.FC = () => {
       .then((response) => {
         if (active) setSpecies(response.data);
       })
-      .catch((requestError: any) => {
+      .catch((requestError: unknown) => {
         if (active) {
-          setError(requestError.response?.data?.error || 'Gagal memuat detail spesies.');
+          const message = isAxiosError<{ error?: string }>(requestError)
+            ? requestError.response?.data?.error
+            : undefined;
+          setError(message || 'Gagal memuat detail spesies.');
         }
       })
       .finally(() => {
@@ -59,29 +76,14 @@ const SpeciesDetailPage: React.FC = () => {
               <p><em>{species.scientificName}</em></p>
             </header>
 
-            {!!species.photos?.length && (
-              <div className="species-detail-photos">
-                {species.photos.map((photo: any, index: number) => {
-                  const photoUrl = getPhotoUrl(photo);
-                  return photoUrl ? (
-                    <IonImg
-                      key={photo.id || photoUrl || index}
-                      src={photoUrl}
-                      alt={photo.alt || photo.caption || species.commonName}
-                    />
-                  ) : null;
-                })}
-              </div>
-            )}
-
             <section className="species-detail-section">
               <h2>Nama Lokal</h2>
               {species.localNames?.length ? (
                 <ul>
-                  {species.localNames.map((localName: any, index: number) => (
-                    <li key={localName.id || `${localName.name}-${index}`}>
-                      {localName.name || '-'}
-                      {localName.dialect ? ` (${localName.dialect})` : ''}
+                  {species.localNames.map((localName, index) => (
+                    <li key={localName.id || `${getLocalName(localName) || 'local-name'}-${index}`}>
+                      {getLocalName(localName) || '-'}
+                      {localName.regionNote ? ` - ${localName.regionNote}` : ''}
                     </li>
                   ))}
                 </ul>
@@ -92,7 +94,7 @@ const SpeciesDetailPage: React.FC = () => {
               <h2>Wilayah Kabupaten/Kota</h2>
               {species.regencies?.length ? (
                 <ul>
-                  {species.regencies.map((entry: any, index: number) => (
+                  {species.regencies.map((entry, index) => (
                     <li key={entry.regency?.id || `${entry.regency?.name}-${index}`}>
                       {entry.regency?.name || '-'}
                       {entry.regency?.province ? `, ${entry.regency.province}` : ''}
@@ -106,7 +108,7 @@ const SpeciesDetailPage: React.FC = () => {
               <h2>Zona WPP</h2>
               {species.wppZones?.length ? (
                 <ul>
-                  {species.wppZones.map((entry: any, index: number) => (
+                  {species.wppZones.map((entry, index) => (
                     <li key={entry.wppZone?.id || `${entry.wppZone?.code}-${index}`}>
                       {entry.wppZone?.code || '-'}
                       {entry.wppZone?.description ? `: ${entry.wppZone.description}` : ''}
@@ -115,6 +117,24 @@ const SpeciesDetailPage: React.FC = () => {
                 </ul>
               ) : <p>Belum ada data zona WPP.</p>}
             </section>
+
+            {!!species.photos?.length && (
+              <section className="species-detail-section species-detail-photo-section">
+                <h2>Foto</h2>
+                <div className="species-detail-photos">
+                  {species.photos.map((photo, index) => {
+                    const photoUrl = getPhotoUrl(photo);
+                    return photoUrl ? (
+                      <IonImg
+                        key={(typeof photo === 'string' ? undefined : photo.id) || photoUrl || index}
+                        src={photoUrl}
+                        alt={(typeof photo === 'string' ? undefined : photo.alt || photo.caption) || species.commonName}
+                      />
+                    ) : null;
+                  })}
+                </div>
+              </section>
+            )}
           </>
         )}
       </article>

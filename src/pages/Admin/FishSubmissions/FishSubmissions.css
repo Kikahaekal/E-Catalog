@@ -1,0 +1,87 @@
+.fish-submissions-page {
+  width: 100%;
+}
+
+.fish-submissions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.fish-submissions-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.fish-submissions-error {
+  margin: 0 0 12px;
+}
+
+.fish-submissions-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 0;
+}
+
+.fish-submissions-table-wrapper {
+  overflow-x: auto;
+}
+
+.fish-submissions-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.fish-submissions-table thead {
+  border-bottom: 2px solid var(--ion-color-light-shade);
+}
+
+.fish-submissions-table tbody tr {
+  border-bottom: 1px solid var(--ion-color-light-tint);
+}
+
+.fish-submissions-table th,
+.fish-submissions-table td {
+  padding: 12px 8px;
+  vertical-align: middle;
+}
+
+.fish-submission-thumbnail {
+  display: block;
+  width: 88px;
+  height: 66px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: var(--ion-color-light);
+}
+
+.fish-submissions-select-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  min-width: 220px;
+}
+
+.fish-submissions-actions {
+  white-space: nowrap;
+}
+
+.fish-submissions-actions ion-button + ion-button {
+  margin-left: 4px;
+}
+
+@media (max-width: 600px) {
+  .fish-submissions-header {
+    align-items: flex-start;
+  }
+
+  .fish-submissions-header h1 {
+    font-size: 1.3rem;
+  }
+}
