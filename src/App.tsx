@@ -1,4 +1,5 @@
-import { Navigate, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, Route, useNavigate } from 'react-router-dom';
 import { 
   IonApp, 
   IonRouterOutlet, 
@@ -11,7 +12,8 @@ import {
   IonList,
   IonItem,
   IonLabel,
-  IonListHeader
+  IonListHeader,
+  IonMenuToggle
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
@@ -48,6 +50,40 @@ import SpeciesSearchPage from './pages/SpeciesSearch';
 import SpeciesDetailPage from './pages/SpeciesDetail';
 import FishSubmissionPage from './pages/FishSubmission';
 import FishSubmissionsAdminPage from './pages/Admin/FishSubmissions/FishSubmissions';
+import { logout } from './services/user';
+
+const AdminLogoutItem: React.FC = () => {
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('role')?.toLowerCase() === 'admin');
+
+  useEffect(() => {
+    const updateRole = () => setIsAdmin(localStorage.getItem('role')?.toLowerCase() === 'admin');
+    window.addEventListener('admin-auth-changed', updateRole);
+    window.addEventListener('storage', updateRole);
+    return () => {
+      window.removeEventListener('admin-auth-changed', updateRole);
+      window.removeEventListener('storage', updateRole);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout().catch(() => undefined);
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    window.dispatchEvent(new Event('admin-auth-changed'));
+    navigate('/login', { replace: true });
+  };
+
+  if (!isAdmin) return null;
+
+  return (
+    <IonMenuToggle>
+      <IonItem button onClick={handleLogout}>
+        <IonLabel>Logout</IonLabel>
+      </IonItem>
+    </IonMenuToggle>
+  );
+};
 
 setupIonicReact();
 
@@ -70,6 +106,7 @@ const App: React.FC = () => (
             <IonItem routerLink="/tambah-ikan" routerDirection="none">
               <IonLabel>Usulkan Nama Ikan</IonLabel>
             </IonItem>
+            <AdminLogoutItem />
 
             {/* nanti tambah menu lain disini */}
           </IonList>
@@ -109,6 +146,7 @@ const App: React.FC = () => (
             <IonItem className="ion-padding-top" routerLink="/home" routerDirection="none">
               <IonLabel>Halaman Utama</IonLabel>
             </IonItem>
+            <AdminLogoutItem />
           </IonList>
         </IonContent>
       </IonMenu>

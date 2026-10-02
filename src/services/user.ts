@@ -13,3 +13,10 @@ export const authUser = async (email: string, password: string): Promise<LoginRe
     });
     return response.data;
 }
+
+export const logout = async (): Promise<void> => {
+    const token = localStorage.getItem('token');
+    await apiClient.post('/api/auth/logout', {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+}

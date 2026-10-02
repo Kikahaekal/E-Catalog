@@ -14,6 +14,7 @@ const LoginPage: React.FC = () => {
             
             localStorage.setItem('token', data.token);
             localStorage.setItem('role', data.role);
+            window.dispatchEvent(new Event('admin-auth-changed'));
 
             if (data.role === 'admin') {
                 router.push('/admin', 'forward', 'replace');
