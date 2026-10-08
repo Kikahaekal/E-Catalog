@@ -46,6 +46,7 @@ import IucnPage from './pages/Admin/master/Iucn/Iucn';
 import RegencyPage from './pages/Admin/master/Regency/Regency';
 import WppZonePage from './pages/Admin/master/WppZone/WppZone';
 import SpeciesPage from './pages/Admin/master/Species/Species';
+import ReferencePage from './pages/Admin/master/Reference/Reference';
 import SpeciesSearchPage from './pages/SpeciesSearch';
 import SpeciesDetailPage from './pages/SpeciesDetail';
 import FishSubmissionPage from './pages/FishSubmission';
@@ -140,6 +141,9 @@ const App: React.FC = () => (
             <IonItem routerLink="/spesies" routerDirection="none">
               <IonLabel>Data Spesies</IonLabel>
             </IonItem>
+            <IonItem routerLink="/referensi" routerDirection="none">
+              <IonLabel>Data Referensi</IonLabel>
+            </IonItem>
             <IonItem routerLink="/permintaan-ikan" routerDirection="none">
               <IonLabel>Permintaan Nama Ikan</IonLabel>
             </IonItem>
@@ -180,6 +184,11 @@ const App: React.FC = () => (
         <Route path="/spesies" element={
           <AdminRoute>
             <SpeciesPage />
+          </AdminRoute>
+        }/>
+        <Route path="/referensi" element={
+          <AdminRoute>
+            <ReferencePage />
           </AdminRoute>
         }/>
         <Route path="/permintaan-ikan" element={

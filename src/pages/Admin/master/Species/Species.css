@@ -63,9 +63,64 @@
   margin-top: 12px;
 }
 
+.species-form-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-light-shade);
+}
+
+.species-form-section h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .species-form-actions {
   margin-top: 24px;
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+@media (min-width: 768px) {
+  .species-form-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+
+  .species-form-section > h3 {
+    grid-column: 1 / -1;
+  }
+
+  .species-form-section > ion-item,
+  .species-form-section > .species-form-item {
+    margin-top: 0;
+  }
+}
+
+.species-related-row {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.species-related-row:last-child {
+  border-bottom: 0;
+}
+
+.species-related-row ion-button {
+  justify-self: flex-end;
+}
+
+@media (min-width: 768px) {
+  .species-related-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .species-related-row > ion-item:last-of-type,
+  .species-related-row > ion-button {
+    grid-column: 1 / -1;
+  }
 }

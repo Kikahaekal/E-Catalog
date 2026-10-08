@@ -118,6 +118,26 @@ const SpeciesDetailPage: React.FC = () => {
               ) : <p>Belum ada data zona WPP.</p>}
             </section>
 
+            <section className="species-detail-section">
+              <h2>Referensi</h2>
+              {species.references?.length ? (
+                <ul>
+                  {species.references.map((entry, index) => {
+                    const reference = entry.reference;
+                    return (
+                      <li key={reference?.id || entry.referenceId || `${reference?.title || 'reference'}-${index}`}>
+                        {reference?.title || '-'}
+                        {reference?.authors ? ` — ${reference.authors}` : ''}
+                        {reference?.year ? ` (${reference.year})` : ''}
+                        {reference?.source ? ` — ${reference.source}` : ''}
+                        {entry.isMainRef ? ' — Referensi utama' : ''}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : <p>Belum ada data referensi.</p>}
+            </section>
+
             {!!species.photos?.length && (
               <section className="species-detail-section species-detail-photo-section">
                 <h2>Foto</h2>
