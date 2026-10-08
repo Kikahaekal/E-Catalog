@@ -48,6 +48,7 @@ import WppZonePage from './pages/Admin/master/WppZone/WppZone';
 import SpeciesPage from './pages/Admin/master/Species/Species';
 import ReferencePage from './pages/Admin/master/Reference/Reference';
 import SpeciesSearchPage from './pages/SpeciesSearch';
+import SpeciesSearchResultsPage from './pages/SpeciesSearchResults';
 import SpeciesDetailPage from './pages/SpeciesDetail';
 import FishSubmissionPage from './pages/FishSubmission';
 import FishSubmissionsAdminPage from './pages/Admin/FishSubmissions/FishSubmissions';
@@ -91,29 +92,6 @@ setupIonicReact();
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      {/* kesini (menu layout) */}
-      <IonMenu menuId="main-menu" contentId="main-content">
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Menu Utama</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList>
-            <IonItem routerLink="/home" routerDirection="none">
-              <IonLabel>Home</IonLabel>
-            </IonItem>
-
-            <IonItem routerLink="/tambah-ikan" routerDirection="none">
-              <IonLabel>Usulkan Nama Ikan</IonLabel>
-            </IonItem>
-            <AdminLogoutItem />
-
-            {/* nanti tambah menu lain disini */}
-          </IonList>
-        </IonContent>
-      </IonMenu>
-
       {/* menu admin */}
       <IonMenu menuId="admin-menu" contentId="main-content">
         <IonHeader>
@@ -158,6 +136,7 @@ const App: React.FC = () => (
       <IonRouterOutlet id="main-content">
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<SpeciesSearchPage />} />
+        <Route path="/search/results" element={<SpeciesSearchResultsPage />} />
         <Route path="/species/:speciesId" element={<SpeciesDetailPage />} />
         <Route path="/tambah-ikan" element={<FishSubmissionPage />} />
         <Route path="/login" element={<LoginPage />}/>
