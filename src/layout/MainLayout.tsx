@@ -10,6 +10,7 @@ import {
 } from '@ionic/react';
 import React from 'react';
 import './Layout.css';
+import Navbar from '../components/ui/Navbar';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -18,15 +19,7 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
         <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonButtons slot="start">
-                        <IonButton routerLink="/home" routerDirection="root">Home</IonButton>
-                        <IonButton routerLink="/search" routerDirection="root">Search</IonButton>
-                        <IonButton routerLink="/tambah-ikan" routerDirection="root">Usulkan Nama Ikan</IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
+            <Navbar />
 
             <IonContent className="ion-padding">
                 {children}
