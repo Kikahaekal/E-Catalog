@@ -18,9 +18,10 @@ import {
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllWpp, createWpp, editWpp, deleteWpp, Wpp } from "../../../../services/wpp"; 
+import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import "./WppZone.css"; 
 
 const WppZonePage: React.FC = () => {
@@ -28,6 +29,7 @@ const WppZonePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [detailItem, setDetailItem] = useState<Wpp | null>(null);
 
   // State Modal & Form Tambah
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -198,6 +200,9 @@ const WppZonePage: React.FC = () => {
                     </td>
                     <td className="wpp-table-td">{item.description}</td>
                     <td className="wpp-table-td wpp-text-center">
+                      <IonButton fill="clear" size="small" aria-label={`Lihat detail WPP ${item.code}`} onClick={() => setDetailItem(item)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       {/* Tombol Edit */}
                       <IonButton 
                         fill="clear" 
@@ -228,6 +233,17 @@ const WppZonePage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail Zona WPP"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Kode", value: detailItem.code },
+          { label: "Deskripsi", value: detailItem.description },
+        ] : []}
+      />
 
       {/* Modal Tambah Data */}
       <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>

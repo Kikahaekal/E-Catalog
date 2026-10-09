@@ -18,8 +18,9 @@ import {
   IonToast,
   IonToolbar,
 } from "@ionic/react";
-import { addOutline, closeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
+import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import {
   createReference,
   deleteReference,
@@ -35,6 +36,7 @@ const ReferencePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  const [detailItem, setDetailItem] = useState<Reference | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRefCode, setNewRefCode] = useState("");
@@ -220,6 +222,9 @@ const ReferencePage: React.FC = () => {
                     <td className="reference-table-td">{item.title}</td>
                     <td className="reference-table-td">{item.year || "-"}</td>
                     <td className="reference-table-td reference-text-center">
+                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.title}`} onClick={() => setDetailItem(item)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       <IonButton fill="clear" size="small" color="warning" onClick={() => openEditModal(item)}>
                         <IonIcon slot="icon-only" icon={pencilOutline} />
                       </IonButton>
@@ -242,6 +247,20 @@ const ReferencePage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail Referensi"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Kode", value: detailItem.refCode ?? "-" },
+          { label: "Penulis", value: detailItem.authors },
+          { label: "Tahun", value: detailItem.year ?? "-" },
+          { label: "Judul", value: detailItem.title },
+          { label: "Sumber", value: detailItem.source || "-" },
+        ] : []}
+      />
 
       <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
         <IonHeader>

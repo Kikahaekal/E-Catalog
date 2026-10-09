@@ -90,9 +90,12 @@ export interface Species {
     fisheriesImportance?: string | null;
     isGamefish?: boolean;
     iucnStatusId?: string | number | null;
+    iucnStatus?: { id?: string | number; code?: string; name?: string } | null;
     iucnAssessedAt?: string | null;
     citesStatus?: string | null;
     cmsStatus?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
     synonyms?: SpeciesSynonymPayload[];
     photos?: SpeciesPhoto[];
     localNames?: SpeciesLocalName[];

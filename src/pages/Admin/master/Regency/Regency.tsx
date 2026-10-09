@@ -18,9 +18,10 @@ import {
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllRegencies, createRegency, editRegency, deleteRegency, Regency } from "../../../../services/regency"; 
+import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import "./Regency.css"; 
 
 const RegencyPage: React.FC = () => {
@@ -28,6 +29,7 @@ const RegencyPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [detailItem, setDetailItem] = useState<Regency | null>(null);
 
   // State Modal & Form Tambah
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -198,6 +200,9 @@ const RegencyPage: React.FC = () => {
                       <IonBadge color="primary">{item.province}</IonBadge>
                     </td>
                     <td className="regency-table-td regency-text-center">
+                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.name}`} onClick={() => setDetailItem(item)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       {/* Tombol Edit */}
                       <IonButton 
                         fill="clear" 
@@ -228,6 +233,17 @@ const RegencyPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail Kabupaten/Kota"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Nama Kabupaten/Kota", value: detailItem.name },
+          { label: "Provinsi", value: detailItem.province },
+        ] : []}
+      />
 
       {/* Modal Tambah Data */}
       <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>

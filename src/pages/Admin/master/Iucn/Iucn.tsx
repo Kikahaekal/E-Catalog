@@ -18,9 +18,10 @@ import {
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllIucn, createIucn, editIucn, deleteIucn, Iucn } from "../../../../services/iucn"; 
+import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import "./Iucn.css"; 
 
 const IucnPage: React.FC = () => {
@@ -28,6 +29,7 @@ const IucnPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [detailItem, setDetailItem] = useState<Iucn | null>(null);
 
   // State Modal & Form Tambah
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -198,6 +200,9 @@ const IucnPage: React.FC = () => {
                     </td>
                     <td className="iucn-table-td">{item.name}</td>
                     <td className="iucn-table-td iucn-text-center">
+                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.code}`} onClick={() => setDetailItem(item)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       {/* Tombol Edit */}
                       <IonButton 
                         fill="clear" 
@@ -228,6 +233,17 @@ const IucnPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail IUCN"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Kode", value: detailItem.code },
+          { label: "Nama Status", value: detailItem.name },
+        ] : []}
+      />
 
       {/* Modal Tambah Data */}
       <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>

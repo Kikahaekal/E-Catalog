@@ -6,6 +6,8 @@ export interface UserSubmission {
     photoFilePath: string;
     locationNote?: string | null;
     submitterName?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
 }
 
 export interface SubmissionResponse {

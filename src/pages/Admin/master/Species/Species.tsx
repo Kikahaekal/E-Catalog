@@ -5,8 +5,9 @@ import {
   IonInput, IonSpinner, IonText, IonBadge, IonButtons,
   IonToast, IonAlert, IonSelect, IonSelectOption
 } from "@ionic/react";
-import { addOutline, closeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
+import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import { getAllSpecies, createSpecies, editSpecies, deleteSpecies, Species, SpeciesPayload } from "../../../../services/species"; 
 import { getAllIucn, Iucn } from "../../../../services/iucn"; 
 import { getAllReferences, Reference } from "../../../../services/reference"; 
@@ -24,6 +25,7 @@ const SpeciesPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [detailItem, setDetailItem] = useState<Species | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [commonName, setCommonName] = useState<string>("");
@@ -390,7 +392,7 @@ const SpeciesPage: React.FC = () => {
 
   const getIucnCode = (id?: string | number | null) => {
     if (id === undefined || id === null || id === "") return "-";
-    const iucn = iucnList.find(i => i.id === id);
+    const iucn = iucnList.find(i => String(i.id) === String(id));
     return iucn ? iucn.code : "-";
   };
 
@@ -447,6 +449,9 @@ const SpeciesPage: React.FC = () => {
                       <IonBadge color="primary">{getIucnCode(item.iucnStatusId)}</IonBadge>
                     </td>
                     <td className="species-table-td species-text-center">
+                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.commonName}`} onClick={() => setDetailItem(item)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       <IonButton fill="clear" size="small" color="warning" onClick={() => openEditModal(item)}>
                         <IonIcon slot="icon-only" icon={pencilOutline} />
                       </IonButton>
@@ -464,6 +469,54 @@ const SpeciesPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail Spesies"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Nama Umum", value: detailItem.commonName },
+          { label: "Nama Ilmiah", value: <em>{detailItem.scientificName}</em> },
+          { label: "Author", value: detailItem.author || "-" },
+          { label: "Etimologi", value: detailItem.etymology || "-" },
+          { label: "Ordo", value: detailItem.order || "-" },
+          { label: "Famili", value: detailItem.family || "-" },
+          { label: "Genus", value: detailItem.genus || "-" },
+          { label: "Lingkungan", value: detailItem.environment || "-" },
+          { label: "Zona Iklim", value: detailItem.climateZone || "-" },
+          { label: "Kedalaman (m)", value: `${detailItem.depthMinMeters ?? "-"} - ${detailItem.depthMaxMeters ?? "-"}` },
+          { label: "Suhu (°C)", value: `${detailItem.tempMinC ?? "-"} - ${detailItem.tempMaxC ?? "-"}` },
+          { label: "Distribusi", value: detailItem.distributionText || "-" },
+          { label: "Panjang Maksimum (cm)", value: detailItem.maxLengthCm ?? "-" },
+          { label: "Tipe Panjang", value: detailItem.lengthType || "-" },
+          { label: "Berat Maksimum (kg)", value: detailItem.maxWeightKg ?? "-" },
+          { label: "Umur Maksimum (tahun)", value: detailItem.maxAgeYears ?? "-" },
+          { label: "Duri Sirip Punggung", value: detailItem.dorsalSpines || "-" },
+          { label: "Jari Lunak Sirip Punggung", value: detailItem.dorsalSoftRays || "-" },
+          { label: "Duri Sirip Anal", value: detailItem.analSpines || "-" },
+          { label: "Jari Lunak Sirip Anal", value: detailItem.analSoftRays || "-" },
+          { label: "Bentuk Tubuh", value: detailItem.bodyShape || "-" },
+          { label: "Morfologi", value: detailItem.morphologyText || "-" },
+          { label: "Biologi", value: detailItem.biologyText || "-" },
+          { label: "Fekunditas", value: detailItem.fecundityText || "-" },
+          { label: "Ancaman bagi Manusia", value: detailItem.threatToHumans || "-" },
+          { label: "Kepentingan Perikanan", value: detailItem.fisheriesImportance || "-" },
+          { label: "Gamefish", value: detailItem.isGamefish ? "Ya" : "Tidak" },
+          { label: "Status IUCN", value: detailItem.iucnStatus ? `${detailItem.iucnStatus.code} - ${detailItem.iucnStatus.name}` : getIucnCode(detailItem.iucnStatusId) },
+          { label: "Tanggal Penilaian IUCN", value: detailItem.iucnAssessedAt || "-" },
+          { label: "Status CITES", value: detailItem.citesStatus || "-" },
+          { label: "Status CMS", value: detailItem.cmsStatus || "-" },
+          { label: "Sinonim", value: detailItem.synonyms?.length ? <ul>{detailItem.synonyms.map((synonym, index) => <li key={`${synonym.scientificName}-${index}`}><em>{synonym.scientificName}</em>{synonym.author ? `, ${synonym.author}` : ""}{synonym.status ? ` (${synonym.status})` : ""}</li>)}</ul> : "-" },
+          { label: "Nama Lokal", value: detailItem.localNames?.length ? <ul>{detailItem.localNames.map((localName, index) => <li key={`${localName.name || "nama"}-${index}`}>{localName.name || "-"}{localName.regionNote ? ` (${localName.regionNote})` : ""}</li>)}</ul> : "-" },
+          { label: "Foto", value: detailItem.photos?.length ? <ul>{detailItem.photos.map((photo, index) => <li key={photo.id || `${photo.filePath}-${index}`}>{photo.caption || photo.filePath}{photo.isPrimary ? " (utama)" : ""}</li>)}</ul> : "-" },
+          { label: "Referensi", value: detailItem.references?.length ? <ul>{detailItem.references.map((entry, index) => <li key={entry.reference?.id || entry.referenceId || index}>{entry.reference?.title || `Referensi ${entry.referenceId || ""}`}{entry.isMainRef ? " (utama)" : ""}</li>)}</ul> : "-" },
+          { label: "Wilayah", value: detailItem.regencies?.length ? <ul>{detailItem.regencies.map((entry, index) => <li key={entry.regency?.id || index}>{entry.regency?.name || "-"}{entry.regency?.province ? `, ${entry.regency.province}` : ""}</li>)}</ul> : "-" },
+          { label: "Zona WPP", value: detailItem.wppZones?.length ? <ul>{detailItem.wppZones.map((entry, index) => <li key={entry.wppZone?.id || index}>{entry.wppZone?.code || "-"}{entry.wppZone?.description ? `: ${entry.wppZone.description}` : ""}</li>)}</ul> : "-" },
+          { label: "Dibuat", value: detailItem.createdAt || "-" },
+          { label: "Diperbarui", value: detailItem.updatedAt || "-" },
+        ] : []}
+      />
 
       {/* Modal Tambah Data */}
       <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>

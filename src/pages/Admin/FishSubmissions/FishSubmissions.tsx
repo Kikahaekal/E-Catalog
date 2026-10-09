@@ -4,6 +4,7 @@ import {
   IonAlert,
   IonButton,
   IonItem,
+  IonIcon,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -11,6 +12,7 @@ import {
   IonToast
 } from '@ionic/react';
 import { AdminLayout } from '../../../layout/AdminLayout';
+import { AdminRecordDetails } from '../../../components/AdminRecordDetails';
 import { apiClient } from '../../../services/api';
 import {
   approveSubmission,
@@ -19,6 +21,7 @@ import {
   UserSubmission
 } from '../../../services/fish';
 import { getAllSpecies, Species } from '../../../services/species';
+import { eyeOutline } from 'ionicons/icons';
 import './FishSubmissions.css';
 
 const getPhotoUrl = (filePath: string): string => {
@@ -43,6 +46,7 @@ const FishSubmissionsAdminPage: React.FC = () => {
   const [processingId, setProcessingId] = useState<string | number | null>(null);
   const [rejectingId, setRejectingId] = useState<string | number | null>(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [detailItem, setDetailItem] = useState<UserSubmission | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -168,6 +172,9 @@ const FishSubmissionsAdminPage: React.FC = () => {
                       </IonItem>
                     </td>
                     <td className="fish-submissions-actions">
+                      <IonButton size="small" fill="clear" aria-label={`Lihat detail permintaan ${submission.submittedName}`} onClick={() => setDetailItem(submission)}>
+                        <IonIcon slot="icon-only" icon={eyeOutline} />
+                      </IonButton>
                       <IonButton
                         size="small"
                         disabled={!selectedSpecies[submission.id] || processingId === submission.id}
@@ -192,6 +199,21 @@ const FishSubmissionsAdminPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AdminRecordDetails
+        title="Detail Permintaan Nama Ikan"
+        isOpen={detailItem !== null}
+        onDismiss={() => setDetailItem(null)}
+        fields={detailItem ? [
+          { label: "ID", value: detailItem.id },
+          { label: "Nama Lokal", value: detailItem.submittedName },
+          { label: "Lokasi", value: detailItem.locationNote || "-" },
+          { label: "Pengusul", value: detailItem.submitterName || "-" },
+          { label: "Foto", value: <img src={getPhotoUrl(detailItem.photoFilePath)} alt={`Foto ${detailItem.submittedName}`} /> },
+          { label: "Dibuat", value: detailItem.createdAt || "-" },
+          { label: "Diperbarui", value: detailItem.updatedAt || "-" },
+        ] : []}
+      />
 
       <IonAlert
         isOpen={rejectingId !== null}
