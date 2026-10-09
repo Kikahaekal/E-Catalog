@@ -43,6 +43,7 @@ const SpeciesSearchResultsPage: React.FC = () => {
 
   return (
     <MainLayout>
+    
       <section className="species-search-page">
         <h1>Hasil Pencarian</h1>
         {name && <p className="species-search-query">Pencarian: <strong>{name}</strong></p>}
