@@ -1,37 +1,36 @@
-import { 
-  IonPage, 
-  IonHeader, 
-  IonToolbar, 
-  IonContent, 
-  IonFooter, 
-  IonTitle,
-  IonButtons,
-    IonButton
-} from '@ionic/react';
+import { IonPage, IonContent } from '@ionic/react';
 import React from 'react';
-import './Layout.css';
 import Navbar from '../components/ui/Navbar';
 
 interface MainLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    return (
-        <IonPage>
-            <Navbar />
+  return (
+    <IonPage>
+      <Navbar />
 
-            <IonContent className="ion-padding">
-                {children}
-            </IonContent>
+      <IonContent
+        fullscreen
+        scrollEvents
+        className="[--background:#ffffff]"
+        onIonScroll={(event) => {
+          window.dispatchEvent(new CustomEvent('app-content-scroll', {
+            detail: event.detail.scrollTop,
+          }));
+        }}
+      >
+        <div className="min-h-screen flex flex-col justify-between bg-white">
+          <main className="flex-1">
+            {children}
+          </main>
 
-            <IonFooter>
-                <IonToolbar>
-                    <IonTitle className="footer-text ion-text-center ion-text-sm">
-                        © 2026 Universitas Maritim Raja Ali Haji
-                    </IonTitle>
-                </IonToolbar>
-            </IonFooter>
-        </IonPage>
-    );
+          <footer className="bg-[#031B33] text-gray-300 py-7 text-center text-sm font-medium border-t border-white/10 tracking-wide">
+            © 2026 Universitas Maritim Raja Ali Haji
+          </footer>
+        </div>
+      </IonContent>
+    </IonPage>
+  );
 };
