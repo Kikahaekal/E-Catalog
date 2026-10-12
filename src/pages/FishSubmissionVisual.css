@@ -1,0 +1,22 @@
+/* Keep native form controls readable when Ionic's global styles are present. */
+.fish-submission-form input,
+.fish-submission-form textarea {
+  color: #0f172a !important;
+  background-color: #f8fafc !important;
+  caret-color: #0284c7;
+  opacity: 1 !important;
+}
+
+.fish-submission-form input::placeholder,
+.fish-submission-form textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.fish-submission-form input:-webkit-autofill,
+.fish-submission-form input:-webkit-autofill:hover,
+.fish-submission-form input:-webkit-autofill:focus,
+.fish-submission-form textarea:-webkit-autofill {
+  -webkit-text-fill-color: #0f172a;
+  -webkit-box-shadow: 0 0 0 1000px #f8fafc inset;
+}

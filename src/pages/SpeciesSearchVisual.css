@@ -1,0 +1,110 @@
+/* Guard against Ionic's native-button reset on the public search screen. */
+.fish-search-hero button,
+.fish-search-discovery button {
+  font: inherit;
+}
+
+.fish-search-submit {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex !important;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9999px;
+  background: #0284c7 !important;
+  color: #fff !important;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fish-search-submit:hover:not(:disabled) {
+  background: #0369a1 !important;
+}
+
+.fish-search-tag {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 0.2) !important;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.1) !important;
+  color: rgb(255 255 255 / 0.9) !important;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+.fish-search-tag:hover,
+.fish-search-tag:focus-visible {
+  background: rgb(255 255 255 / 0.25) !important;
+  color: #fff !important;
+}
+
+.fish-search-field input {
+  min-width: 0;
+  color: #0f172a !important;
+  caret-color: #0284c7;
+  opacity: 1 !important;
+}
+
+.fish-search-field input::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.fish-search-field input:-webkit-autofill,
+.fish-search-field input:-webkit-autofill:hover,
+.fish-search-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0f172a;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+}
+
+.fish-search-card {
+  position: relative;
+  min-height: 14.5rem;
+  overflow: hidden;
+}
+
+.fish-search-card-action {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent !important;
+  cursor: pointer;
+}
+
+.fish-search-card > :not(.fish-search-card-action) {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fish-search-card:has(.fish-search-card-action:focus-visible) {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .fish-search-hero {
+    padding-top: 7rem;
+    padding-bottom: 4rem;
+  }
+
+  .fish-search-field {
+    border-radius: 1.25rem;
+  }
+
+  .fish-search-submit {
+    padding-inline: 1rem;
+  }
+}
