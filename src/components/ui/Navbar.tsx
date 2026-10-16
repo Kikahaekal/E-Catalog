@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [navSearch, setNavSearch] = useState('');
+  const hasImageBackground = ['/home', '/search', '/tambah-ikan'].includes(location.pathname);
+  const whiteLinkStyle: React.CSSProperties = { color: '#ffffff' };
 
   useEffect(() => {
     const handleScroll = (event?: Event) => {
@@ -22,15 +22,6 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (navSearch.trim()) {
-      navigate(`/search/results?name=${encodeURIComponent(navSearch.trim())}`);
-      setNavSearch('');
-      setIsMenuOpen(false);
-    }
-  };
-
   const isActive = (path: string) => {
     if (path === '/home' || path === '/') {
       return location.pathname === '/' || location.pathname === '/home';
@@ -40,53 +31,32 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isScrolled
-          ? 'bg-[#031B33]/75 backdrop-blur-xl shadow-lg border-b border-white/15 py-5'
-          : 'bg-transparent py-5'
+      className={`site-navbar fixed top-0 left-0 z-50 w-full transition-all duration-300 ${hasImageBackground
+          ? isScrolled
+            ? 'bg-[#00182C]/85 backdrop-blur-xl shadow-lg border-b border-white/15 py-5'
+            : 'bg-transparent py-5'
+          : 'bg-[#00182C] shadow-md border-b border-white/10 py-5'
         } translate-y-0`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
         {/* Brand Logo */}
         <Link
           to="/"
-          className="font-marhey text-3xl md:text-4xl text-white font-bold tracking-wide drop-shadow-md hover:opacity-90 transition-opacity"
+          className="font-marhey text-3xl md:text-4xl text-white tracking-wide drop-shadow-md hover:opacity-90 transition-opacity"
+          style={whiteLinkStyle}
         >
           E-Catalog
         </Link>
 
-        {/* Desktop Navigation & Search */}
-        <div className="hidden lg:flex items-center gap-6">
-          {/* Quick Search Capsule */}
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-            <svg
-              className="w-4 h-4 text-white/70 absolute left-3.5 pointer-events-none"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="text"
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              placeholder="Cari nama ikan lokal..."
-              className="bg-white/15 hover:bg-white/20 focus:bg-white/25 text-white placeholder-white/75 text-sm rounded-full pl-9 pr-4 py-1.5 w-60 xl:w-72 border border-white/35 focus:outline-none focus:ring-2 focus:ring-sky-400 backdrop-blur-sm transition-all"
-            />
-          </form>
-
-          {/* Links */}
-          <div className="flex items-center gap-6 text-[15px] font-medium text-white">
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center">
+          <div className="flex items-center gap-8 text-[15px] font-medium text-white">
             <Link
               to="/home"
+              style={whiteLinkStyle}
               className={`relative py-1 transition-colors hover:text-white ${isActive('/home')
                   ? 'text-white font-semibold after:content-[\'\'] after:absolute after:-bottom-0.5 after:left-0 after:w-full after:h-0.5 after:bg-white after:rounded-full'
-                  : 'text-white/80'
+                  : 'text-white'
                 }`}
             >
               Home
@@ -94,9 +64,10 @@ const Navbar: React.FC = () => {
 
             <Link
               to="/search"
+              style={whiteLinkStyle}
               className={`relative py-1 transition-colors hover:text-white ${isActive('/search')
                   ? 'text-white font-semibold after:content-[\'\'] after:absolute after:-bottom-0.5 after:left-0 after:w-full after:h-0.5 after:bg-white after:rounded-full'
-                  : 'text-white/80'
+                  : 'text-white'
                 }`}
             >
               Search
@@ -104,9 +75,10 @@ const Navbar: React.FC = () => {
 
             <Link
               to="/tambah-ikan"
+              style={whiteLinkStyle}
               className={`relative py-1 transition-colors hover:text-white ${isActive('/tambah-ikan')
                   ? 'text-white font-semibold after:content-[\'\'] after:absolute after:-bottom-0.5 after:left-0 after:w-full after:h-0.5 after:bg-white after:rounded-full'
-                  : 'text-white/80'
+                  : 'text-white'
                 }`}
             >
               Usulan Nama Ikan
@@ -132,37 +104,15 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Dropdown Menu */}
       <div
-        className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden px-6 ${isMenuOpen ? 'max-h-80 opacity-100 pt-3 pb-4' : 'max-h-0 opacity-0 py-0'
+        className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden px-6 ${isMenuOpen ? 'max-h-64 opacity-100 pt-3 pb-4' : 'max-h-0 opacity-0 py-0'
           }`}
       >
         <div className="bg-[#031B33]/95 backdrop-blur-xl border border-white/15 rounded-2xl p-4 flex flex-col gap-3 shadow-2xl">
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center mb-1">
-            <svg
-              className="w-4 h-4 text-white/70 absolute left-3.5 pointer-events-none"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="text"
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              placeholder="Cari nama ikan..."
-              className="w-full bg-white/15 text-white placeholder-white/70 text-sm rounded-xl pl-9 pr-4 py-2 border border-white/20 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            />
-          </form>
-
           <Link
             to="/home"
             onClick={() => setIsMenuOpen(false)}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/home') ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+            style={whiteLinkStyle}
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/home') ? 'bg-white/15 text-white' : 'text-white hover:bg-white/10'
               }`}
           >
             Home
@@ -170,7 +120,8 @@ const Navbar: React.FC = () => {
           <Link
             to="/search"
             onClick={() => setIsMenuOpen(false)}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/search') ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+            style={whiteLinkStyle}
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/search') ? 'bg-white/15 text-white' : 'text-white hover:bg-white/10'
               }`}
           >
             Search
@@ -178,7 +129,8 @@ const Navbar: React.FC = () => {
           <Link
             to="/tambah-ikan"
             onClick={() => setIsMenuOpen(false)}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/tambah-ikan') ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+            style={whiteLinkStyle}
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${isActive('/tambah-ikan') ? 'bg-white/15 text-white' : 'text-white hover:bg-white/10'
               }`}
           >
             Usulan Nama Ikan

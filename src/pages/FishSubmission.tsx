@@ -242,7 +242,7 @@ const FishSubmissionPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200 disabled:opacity-50 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer"
+                  className="w-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200 disabled:opacity-50 text-white font-semibold py-4 px-8 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

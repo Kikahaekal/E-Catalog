@@ -155,106 +155,77 @@ const SpeciesSearchResultsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Results Grid / Table */}
+          {/* Results Table */}
           {!loading && !error && species.length > 0 && (
             <div className="space-y-6">
               <div className="flex items-center justify-between text-sm text-slate-500">
                 <span>Ditemukan <strong>{species.length}</strong> spesies</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {species.map((item) => {
-                  const localNamesList = item.localNames
-                    ?.map((ln: any) => ln.name || ln.submittedName || (typeof ln.localName === 'string' ? ln.localName : ln.localName?.name))
-                    .filter(Boolean) || [];
+              <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full min-w-[760px] divide-y divide-slate-200 text-left">
+                  <thead className="bg-slate-100 text-xs font-semibold uppercase text-slate-600">
+                    <tr>
+                      <th scope="col" className="px-6 py-4">Foto</th>
+                      <th scope="col" className="px-6 py-4">Nama Ikan</th>
+                      <th scope="col" className="px-6 py-4">Sebutan Lokal</th>
+                      <th scope="col" className="px-6 py-4">Famili</th>
+                      <th scope="col" className="px-6 py-4">Status IUCN</th>
+                      <th scope="col" className="px-6 py-4">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+                    {species.map((item) => {
+                      const localNamesList = item.localNames
+                        ?.map((ln: any) => ln.name || ln.submittedName || (typeof ln.localName === 'string' ? ln.localName : ln.localName?.name))
+                        .filter(Boolean) || [];
+                      const photoPath = item.photos?.[0]?.filePath;
 
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl hover:border-sky-300 transition-all flex flex-col group"
-                    >
-                      {/* Photo Thumbnail */}
-                      <div className="h-44 bg-slate-100 relative overflow-hidden">
-                        {item.photos && item.photos.length > 0 && item.photos[0]?.filePath ? (
-                          <img
-                            src={
-                              item.photos[0].filePath.startsWith('http')
-                                ? item.photos[0].filePath
-                                : `http://localhost:3000${item.photos[0].filePath}`
-                            }
-                            alt={item.commonName}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            onError={(e) => {
-                              // Fallback image if file not found
-                              (e.target as HTMLImageElement).src = '/assets/school-fish.jpg';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400">
-                            <svg className="w-10 h-10 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span className="text-xs">Foto belum tersedia</span>
-                          </div>
-                        )}
-                        {item.iucnStatus && (
-                          <span className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full border border-white/20">
-                            {item.iucnStatus.code || item.iucnStatus.name}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Content Details */}
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div>
-                          <h3 className="font-bold text-lg text-slate-900 group-hover:text-sky-600 transition-colors">
-                            {item.commonName}
-                          </h3>
-                          <p className="text-xs text-slate-500 italic font-serif">
-                            {item.scientificName}
-                          </p>
-
-                          {/* Local Names Badges */}
-                          <div className="mt-3">
-                            <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
-                              Sebutan Lokal:
-                            </span>
-                            {localNamesList.length > 0 ? (
-                              <div className="flex flex-wrap gap-1.5">
-                                {localNamesList.map((ln, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="inline-block bg-sky-50 text-sky-700 text-xs px-2.5 py-0.5 rounded-md font-medium border border-sky-100"
-                                  >
-                                    {ln}
-                                  </span>
-                                ))}
-                              </div>
+                      return (
+                        <tr key={item.id} className="hover:bg-sky-50/50">
+                          <td className="px-6 py-4">
+                            {photoPath ? (
+                              <img
+                                src={photoPath.startsWith('http') ? photoPath : `http://localhost:3000${photoPath}`}
+                                alt={item.commonName}
+                                className="h-12 w-16 rounded-md object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/assets/school-fish.jpg';
+                                }}
+                              />
                             ) : (
-                              <span className="text-xs text-slate-400 italic">—</span>
+                              <span className="flex h-12 w-16 items-center justify-center rounded-md bg-slate-100 text-[10px] text-slate-400">
+                                Tanpa foto
+                              </span>
                             )}
-                          </div>
-                        </div>
-
-                        {/* View Details Action */}
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-xs text-slate-400">
-                            {item.family ? `Famili: ${item.family}` : ''}
-                          </span>
-                          <Link
-                            to={`/species/${item.id}?name=${encodeURIComponent(nameParam)}`}
-                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 hover:text-sky-800 transition-colors"
-                          >
-                            <span>Lihat Detail</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-semibold text-slate-900">{item.commonName}</div>
+                            <div className="text-xs italic text-slate-500">{item.scientificName}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            {localNamesList.length > 0 ? localNamesList.join(', ') : <span className="text-slate-400">—</span>}
+                          </td>
+                          <td className="px-6 py-4">{item.family || <span className="text-slate-400">—</span>}</td>
+                          <td className="px-6 py-4">
+                            {item.iucnStatus?.code || item.iucnStatus?.name || <span className="text-slate-400">—</span>}
+                          </td>
+                          <td className="px-6 py-4">
+                            <Link
+                              to={`/species/${item.id}?name=${encodeURIComponent(nameParam)}`}
+                              className="inline-flex items-center gap-1.5 whitespace-nowrap font-semibold text-sky-600 transition-colors hover:text-sky-800"
+                            >
+                              <span>Lihat Detail</span>
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
