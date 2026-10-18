@@ -1,44 +1,28 @@
-import { 
-  IonPage, 
-  IonHeader, 
-  IonToolbar, 
-  IonContent, 
-  IonSearchbar, 
-  IonFooter, 
-  IonTitle,
-  IonButtons,
-  IonMenuButton
-} from '@ionic/react';
-import React from 'react';
-import './Layout.css';
+import React, { useState } from 'react';
+import { IonContent, IonPage } from '@ionic/react';
+import { useLocation } from 'react-router-dom';
+import { AdminSidebar } from '../components/admin/AdminSidebar';
+import { AdminHeader } from '../components/admin/AdminHeader';
+import './AdminLayout.css';
 
 interface AdminLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-    return (
-        <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonButtons slot="start">
-                        {/* ion menu button nyambung ke app.tsx */}
-                        <IonMenuButton menu="admin-menu"/>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
+  const { pathname } = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const title = AdminSidebar.navigation.find((item) => item.path === pathname)?.label || 'Admin';
 
-            <IonContent className="ion-padding">
-                {children}
-            </IonContent>
-
-            <IonFooter>
-                <IonToolbar>
-                    <IonTitle className="footer-text ion-text-center ion-text-sm">
-                        © 2026 Universitas Maritim Raja Ali Haji
-                    </IonTitle>
-                </IonToolbar>
-            </IonFooter>
-        </IonPage>
-    );
+  return (
+    <IonPage className={`admin-shell admin-layout${sidebarOpen ? '' : ' admin-layout--collapsed'}`}>
+      <AdminSidebar />
+      <div className="admin-layout__main">
+        <AdminHeader title={title} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+        <IonContent className="admin-layout__content">
+          <main className="admin-layout__body" id="admin-page-content" tabIndex={-1}>{children}</main>
+        </IonContent>
+      </div>
+    </IonPage>
+  );
 };

@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   IonSearchbar, IonButton, IonIcon, IonModal, IonHeader,
   IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
-  IonInput, IonSpinner, IonText, IonBadge, IonButtons,
+  IonInput, IonSpinner, IonText, IonButtons,
   IonToast, IonAlert, IonSelect, IonSelectOption
 } from "@ionic/react";
-import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import { getAllSpecies, createSpecies, editSpecies, deleteSpecies, Species, SpeciesPayload } from "../../../../services/species"; 
@@ -398,69 +398,69 @@ const SpeciesPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="ion-padding">
-        <IonSearchbar
-          value={searchText}
-          onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Cari nama spesies..."
-          className="species-searchbar"
-        />
-
-        <div className="species-header-container">
-          <h2 className="species-title">Data Spesies</h2>
-          <IonButton onClick={() => setIsModalOpen(true)}>
-            <IonIcon slot="start" icon={addOutline} />
+      <div className="admin-species-page">
+        <div className="species-toolbar">
+          <IonSearchbar
+            value={searchText}
+            onIonInput={(e) => setSearchText(e.detail.value!)}
+            placeholder="Cari nama spesies..."
+            aria-label="Cari nama spesies"
+            className="species-searchbar"
+          />
+          <IonButton className="species-add-button" fill="clear" onClick={() => setIsModalOpen(true)}>
             Tambah Data
+            <img slot="end" src="/assets/admin/species-add.svg" alt="" />
           </IonButton>
         </div>
 
         {loading ? (
-          <div className="species-loading-container">
+          <div className="species-loading-container" role="status">
             <IonSpinner name="crescent" />
             <p><IonText color="medium">Memuat data...</IonText></p>
           </div>
         ) : error ? (
-          <div className="species-message-container">
-            <IonText color="danger">{error}</IonText>
+          <div className="species-message-container species-error-state">
+            <p role="alert"><IonText color="danger">{error}</IonText></p>
+            <IonButton fill="outline" onClick={fetchData}>Coba lagi</IonButton>
           </div>
         ) : filteredSpecies.length === 0 ? (
           <div className="species-message-container">
-            <IonText color="medium">Data Spesies tidak ditemukan.</IonText>
+            <IonText color="medium">{speciesList.length === 0 ? "Belum ada spesies terdaftar." : "Tidak ada spesies yang cocok dengan pencarian."}</IonText>
           </div>
         ) : (
-          <div className="species-table-wrapper">
-            <table className="species-table">
+          <div className="species-table-wrapper" role="region" aria-label="Daftar spesies" tabIndex={0}>
+            <table className="species-table" aria-label="Data spesies">
               <thead>
                 <tr className="species-table-header-row">
-                  <th className="species-table-th">No</th>
-                  <th className="species-table-th">Nama Umum</th>
-                  <th className="species-table-th">Nama Ilmiah</th>
-                  <th className="species-table-th">Status IUCN</th>
-                  <th className="species-table-th species-text-center">Aksi</th>
+                  <th scope="col" className="species-table-th">Nama Umum</th>
+                  <th scope="col" className="species-table-th">Nama Ilmiah</th>
+                  <th scope="col" className="species-table-th">Status IUCN</th>
+                  <th scope="col" className="species-table-th species-text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredSpecies.map((item, index) => (
+                {filteredSpecies.map((item) => (
                   <tr key={item.id} className="species-table-row">
-                    <td className="species-table-td">{index + 1}</td>
                     <td className="species-table-td">{item.commonName}</td>
                     <td className="species-table-td"><em>{item.scientificName}</em></td>
                     <td className="species-table-td">
-                      <IonBadge color="primary">{getIucnCode(item.iucnStatusId)}</IonBadge>
+                      <span className="species-iucn-code">{getIucnCode(item.iucnStatusId)}</span>
                     </td>
                     <td className="species-table-td species-text-center">
-                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.commonName}`} onClick={() => setDetailItem(item)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      <IonButton fill="clear" size="small" color="warning" onClick={() => openEditModal(item)}>
-                        <IonIcon slot="icon-only" icon={pencilOutline} />
-                      </IonButton>
-                      <IonButton fill="clear" size="small" color="danger" onClick={() => {
-                          setDeletingId(item.id);
-                          setIsAlertDeleteOpen(true);
-                      }}>
-                        <IonIcon slot="icon-only" icon={trashOutline} />
-                      </IonButton>
+                      <div className="species-row-actions">
+                        <IonButton className="species-action-button" fill="clear" aria-label={`Lihat detail ${item.commonName}`} onClick={() => setDetailItem(item)}>
+                          <img src="/assets/admin/species-eye.svg" alt="" />
+                        </IonButton>
+                        <IonButton className="species-action-button" fill="clear" aria-label={`Edit ${item.commonName}`} onClick={() => openEditModal(item)}>
+                          <img src="/assets/admin/species-edit.svg" alt="" />
+                        </IonButton>
+                        <IonButton className="species-action-button" fill="clear" color="danger" aria-label={`Hapus ${item.commonName}`} onClick={() => {
+                            setDeletingId(item.id);
+                            setIsAlertDeleteOpen(true);
+                        }}>
+                          <img src="/assets/admin/species-delete.svg" alt="" />
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
