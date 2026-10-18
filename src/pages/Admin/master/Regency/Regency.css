@@ -1,61 +1,84 @@
-.regency-searchbar {
-  margin-bottom: 16px;
+.admin-regency-page {
+  min-width: 0;
+  color: var(--admin-navy, #0c1d34);
+  font-family: 'Inter', var(--font-sans), sans-serif;
 }
 
-.regency-header-container {
+.admin-regency-page .regency-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
 }
 
-.regency-title {
+.admin-regency-page .regency-searchbar {
+  --background: #fff;
+  --color: #0c1d34;
+  --placeholder-color: #456782;
+  --icon-color: #4a98c9;
+  --clear-button-color: #0f2c54;
+  --box-shadow: none;
+  --border-radius: 15px;
+  flex: 1;
+  max-width: 440px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--admin-border, #5690b7);
+  border-radius: 15px;
+}
+
+.admin-regency-page .regency-add-button {
+  --color: #0f2c54;
+  --background-hover: #97c9ea;
+  --border-radius: 15px;
+  --padding-start: 12px;
+  --padding-end: 0;
+  flex-shrink: 0;
   margin: 0;
-  font-weight: 600;
+  min-height: 44px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
-.regency-loading-container,
-.regency-message-container {
-  text-align: center;
-  padding: 32px 16px;
-}
+.admin-regency-page .regency-add-button img { margin-left: 10px; }
+.admin-regency-page .regency-loading-container,
+.admin-regency-page .regency-message-container { padding: 32px 24px; border: 1px solid var(--admin-border, #5690b7); border-radius: 30px; text-align: center; }
+.admin-regency-page .regency-error-state p { margin: 0 0 16px; }
+.admin-regency-page .regency-loading-container ion-spinner { color: var(--admin-primary, #0f2c54); }
 
-.regency-table-wrapper {
+.admin-regency-page .regency-table-wrapper {
+  max-width: 100%;
   overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid var(--ion-color-light-shade, #e0e0e0);
+  border: 1px solid var(--admin-border, #5690b7);
+  border-radius: 30px;
 }
 
-.regency-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: var(--ion-card-background, #ffffff);
+.admin-regency-page .regency-table-wrapper:focus-visible { outline: 2px solid var(--admin-primary, #0f2c54); outline-offset: 4px; }
+.admin-regency-page .regency-table { width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; font-size: 16px; line-height: 25px; }
+.admin-regency-page .regency-table-th { height: 44px; padding: 9px 25px; background: rgba(151, 201, 234, .3); color: var(--admin-primary, #0f2c54); border-bottom: 1px solid var(--admin-border, #5690b7); font-weight: 700; }
+.admin-regency-page .regency-table-th:nth-child(1) { width: 75px; }
+.admin-regency-page .regency-table-th:nth-child(2) { width: 34%; }
+.admin-regency-page .regency-table-th:nth-child(3) { width: auto; }
+.admin-regency-page .regency-table-th:nth-child(4) { width: 214px; }
+.admin-regency-page .regency-table-td { height: 77px; padding: 15px 25px; color: #23302d; overflow-wrap: anywhere; vertical-align: middle; }
+.admin-regency-page .regency-table-row:not(:last-child) .regency-table-td { border-bottom: 1px solid var(--admin-border, #5690b7); }
+.admin-regency-page .regency-text-center { text-align: center; }
+.admin-regency-page .regency-row-actions { display: flex; justify-content: center; align-items: center; gap: 4px; }
+.admin-regency-page .regency-action-button { --padding-start: 7px; --padding-end: 7px; --border-radius: 10px; --color: #0f2c54; width: 44px; min-width: 44px; height: 44px; margin: 0; }
+.admin-regency-page .regency-action-button img { display: block; flex-shrink: 0; max-width: none; }
+
+@media (max-width: 639px) {
+  .admin-regency-page .regency-toolbar { align-items: stretch; flex-direction: column; gap: 12px; }
+  .admin-regency-page .regency-searchbar { width: 100%; max-width: none; }
+  .admin-regency-page .regency-add-button { align-self: flex-end; }
 }
 
-.regency-table-header-row {
-  background-color: var(--ion-color-light, #f4f5f8);
-}
-
-.regency-table-th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  border-bottom: 2px solid var(--ion-color-light-shade, #e0e0e0);
-}
-
-.regency-table-td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--ion-color-light-shade, #e0e0e0);
-}
-
-.regency-table-row:hover {
-  background-color: var(--ion-color-light-tint, #f9f9f9);
-}
-
-.regency-text-center {
-  text-align: center;
-}
-
+/* Form: existing modal rules. */
 .regency-form-item {
   margin-top: 12px;
 }

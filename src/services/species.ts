@@ -54,7 +54,7 @@ export interface SpeciesPhotoPayload {
 }
 
 export interface SpeciesReferencePayload {
-    referenceId: number;
+    referenceId: string | number;
     isMainRef?: boolean;
 }
 
@@ -101,6 +101,7 @@ export interface Species {
     localNames?: SpeciesLocalName[];
     references?: SpeciesReference[];
     regencies?: { 
+        regencyId?: number;
         id?: string | number;
         regency: { 
             id?: string | number;
@@ -109,6 +110,7 @@ export interface Species {
         } 
     }[];
     wppZones?: { 
+        wppZoneId?: number;
         id?: string | number;
         wppZone: { 
             id?: string | number;

@@ -1,3 +1,5 @@
+import "../../../../components/admin/AdminFormModal.css";
+import { getApiErrorMessage, isEmptyMasterList } from "../../../../utils/apiErrors";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   IonSearchbar,
@@ -7,18 +9,16 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonContent,
   IonItem,
   IonLabel,
   IonInput,
   IonSpinner,
   IonText,
-  IonBadge,
   IonButtons,
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllIucn, createIucn, editIucn, deleteIucn, Iucn } from "../../../../services/iucn"; 
 import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
@@ -58,10 +58,15 @@ const IucnPage: React.FC = () => {
     try {
       const response = await getAllIucn();
       setIucnList(response.data || []);
-    } catch (err: any) {
-      console.error("Gagal mengambil data IUCN:", err);
+    } catch (err: unknown) {
+      // The list controller uses this exact response for an empty database.
+      if (isEmptyMasterList(err, "iucn")) {
+        setIucnList([]);
+        return;
+      }
+
       const errorMessage =
-        err.response?.data?.error || "Gagal memuat data IUCN dari server.";
+        getApiErrorMessage(err, "Gagal memuat data IUCN dari server.");
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -96,8 +101,8 @@ const IucnPage: React.FC = () => {
       setNewName("");
       setIsModalOpen(false);
       fetchIucn(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menyimpan data IUCN";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menyimpan data IUCN");
       alert(errMsg);
     } finally {
       setIsSubmitting(false);
@@ -123,8 +128,8 @@ const IucnPage: React.FC = () => {
       setToastMessage("Data IUCN berhasil diperbarui");
       setIsEditModalOpen(false);
       fetchIucn(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal memperbarui data IUCN";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal memperbarui data IUCN");
       alert(errMsg);
     } finally {
       setIsEditing(false);
@@ -139,8 +144,8 @@ const IucnPage: React.FC = () => {
       await deleteIucn(deletingId);
       setToastMessage("Data IUCN berhasil dihapus");
       fetchIucn(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menghapus data IUCN (mungkin sedang digunakan)";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menghapus data IUCN (mungkin sedang digunakan)");
       alert(errMsg);
     } finally {
       setDeletingId(null);
@@ -149,46 +154,44 @@ const IucnPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="ion-padding">
-        <IonSearchbar
-          value={searchText}
-          onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Cari kode atau nama IUCN..."
-          className="iucn-searchbar"
-        />
-
-        <div className="iucn-header-container">
-          <h2 className="iucn-title">
-            Data IUCN
-          </h2>
-          <IonButton onClick={() => setIsModalOpen(true)}>
-            <IonIcon slot="start" icon={addOutline} />
+      <div className="admin-iucn-page">
+        <div className="iucn-toolbar">
+          <IonSearchbar
+            value={searchText}
+            onIonInput={(e) => setSearchText(e.detail.value!)}
+            placeholder="Cari kode atau nama IUCN..."
+            aria-label="Cari kode atau nama IUCN"
+            className="iucn-searchbar"
+          />
+          <IonButton className="iucn-add-button" fill="clear" onClick={() => setIsModalOpen(true)}>
             Tambah Data
+            <img src="/assets/admin/species-add.svg" width="25" height="25" alt="" />
           </IonButton>
         </div>
 
         {loading ? (
-          <div className="iucn-loading-container">
+          <div className="iucn-loading-container" role="status">
             <IonSpinner name="crescent" />
             <p><IonText color="medium">Memuat data...</IonText></p>
           </div>
         ) : error ? (
-          <div className="iucn-message-container">
-            <IonText color="danger">{error}</IonText>
+          <div className="iucn-message-container iucn-error-state" role="alert">
+            <p><IonText color="danger">{error}</IonText></p>
+            <IonButton onClick={fetchIucn}>Coba lagi</IonButton>
           </div>
         ) : filteredIucn.length === 0 ? (
           <div className="iucn-message-container">
-            <IonText color="medium">Data IUCN tidak ditemukan.</IonText>
+            <IonText color="medium">{iucnList.length === 0 ? "Belum ada data IUCN." : "Tidak ada IUCN yang cocok dengan pencarian."}</IonText>
           </div>
         ) : (
-          <div className="iucn-table-wrapper">
-            <table className="iucn-table">
+          <div className="iucn-table-wrapper" role="region" aria-label="Tabel IUCN, geser untuk melihat seluruh kolom" tabIndex={0}>
+            <table className="iucn-table" aria-label="Data IUCN">
               <thead>
                 <tr className="iucn-table-header-row">
-                  <th className="iucn-table-th">No</th>
-                  <th className="iucn-table-th">Kode</th>
-                  <th className="iucn-table-th">Nama Status</th>
-                  <th className="iucn-table-th iucn-text-center">Aksi</th>
+                  <th scope="col" className="iucn-table-th">No</th>
+                  <th scope="col" className="iucn-table-th">Kode</th>
+                  <th scope="col" className="iucn-table-th">Nama Status</th>
+                  <th scope="col" className="iucn-table-th iucn-text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,35 +199,39 @@ const IucnPage: React.FC = () => {
                   <tr key={item.id} className="iucn-table-row">
                     <td className="iucn-table-td">{index + 1}</td>
                     <td className="iucn-table-td">
-                      <IonBadge color="primary">{item.code}</IonBadge>
+                      <span>{item.code}</span>
                     </td>
                     <td className="iucn-table-td">{item.name}</td>
                     <td className="iucn-table-td iucn-text-center">
-                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.code}`} onClick={() => setDetailItem(item)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      {/* Tombol Edit */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="warning"
-                        onClick={() => openEditModal(item)}
-                      >
-                        <IonIcon slot="icon-only" icon={pencilOutline} />
-                      </IonButton>
-                      
-                      {/* Tombol Hapus */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="danger"
-                        onClick={() => {
-                          setDeletingId(item.id);
-                          setIsAlertDeleteOpen(true);
-                        }}
-                      >
-                        <IonIcon slot="icon-only" icon={trashOutline} />
-                      </IonButton>
+                      <div className="iucn-row-actions">
+                        <IonButton className="iucn-action-button" fill="clear" size="small" aria-label={`Lihat detail ${item.code}`} onClick={() => setDetailItem(item)}>
+                          <img src="/assets/admin/species-eye.svg" width="30" height="30" alt="" />
+                        </IonButton>
+                        {/* Tombol Edit */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="iucn-action-button"
+                          aria-label={`Edit ${item.code}`}
+                          onClick={() => openEditModal(item)}
+                        >
+                          <img src="/assets/admin/species-edit.svg" width="19.532" height="19.531" alt="" />
+                        </IonButton>
+
+                        {/* Tombol Hapus */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="iucn-action-button"
+                          aria-label={`Hapus ${item.code}`}
+                          onClick={() => {
+                            setDeletingId(item.id);
+                            setIsAlertDeleteOpen(true);
+                          }}
+                        >
+                          <img src="/assets/admin/species-delete.svg" width="18.75" height="20.3125" alt="" />
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -246,22 +253,24 @@ const IucnPage: React.FC = () => {
       />
 
       {/* Modal Tambah Data */}
-      <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Tambah Data IUCN" aria-labelledby="iucn-create-title" isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Tambah Data IUCN</IonTitle>
+            <IonTitle id="iucn-create-title">Tambah Data IUCN</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleCreate}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Kode IUCN</IonLabel>
-              <IonInput
+              <IonInput aria-label="Kode IUCN"
                 value={newCode}
                 placeholder="Contoh: CR, EN, VU"
                 onIonInput={(e) => setNewCode(e.detail.value!)}
@@ -270,13 +279,14 @@ const IucnPage: React.FC = () => {
             </IonItem>
             <IonItem className="iucn-form-item">
               <IonLabel position="stacked">Nama Status</IonLabel>
-              <IonInput
+              <IonInput aria-label="Nama Status"
                 value={newName}
                 placeholder="Contoh: Critically Endangered"
                 onIonInput={(e) => setNewName(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="iucn-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsModalOpen(false)}>
                 Batal
@@ -286,26 +296,28 @@ const IucnPage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       {/* Modal Edit Data */}
-      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Edit Data IUCN" aria-labelledby="iucn-edit-title" isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Edit Data IUCN</IonTitle>
+            <IonTitle id="iucn-edit-title">Edit Data IUCN</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsEditModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsEditModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleEdit}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Kode IUCN</IonLabel>
-              <IonInput
+              <IonInput aria-label="Kode IUCN"
                 value={editCode}
                 placeholder="Contoh: CR, EN, VU"
                 onIonInput={(e) => setEditCode(e.detail.value!)}
@@ -314,13 +326,14 @@ const IucnPage: React.FC = () => {
             </IonItem>
             <IonItem className="iucn-form-item">
               <IonLabel position="stacked">Nama Status</IonLabel>
-              <IonInput
+              <IonInput aria-label="Nama Status"
                 value={editName}
                 placeholder="Contoh: Critically Endangered"
                 onIonInput={(e) => setEditName(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="iucn-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsEditModalOpen(false)}>
                 Batal
@@ -330,7 +343,7 @@ const IucnPage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       <IonAlert

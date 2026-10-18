@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { isAxiosError } from 'axios';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
 import {
   IonAlert,
   IonButton,
   IonItem,
-  IonIcon,
   IonSelect,
   IonSelectOption,
   IonSpinner,
@@ -21,7 +20,6 @@ import {
   UserSubmission
 } from '../../../services/fish';
 import { getAllSpecies, Species } from '../../../services/species';
-import { eyeOutline } from 'ionicons/icons';
 import './FishSubmissions.css';
 
 const getPhotoUrl = (filePath: string): string => {
@@ -30,11 +28,23 @@ const getPhotoUrl = (filePath: string): string => {
   return `${baseUrl}/${filePath.replace(/\\/g, '/').replace(/^\/+/, '')}`;
 };
 
-const getRequestError = (error: unknown, fallback: string): string => {
-  if (isAxiosError<{ error?: string }>(error)) {
-    return error.response?.data?.error || fallback;
-  }
-  return fallback;
+const getRequestError = getApiErrorMessage;
+
+// Keep photo failures local to each image; reset naturally when its path changes.
+const SubmissionPhoto: React.FC<{ filePath?: string | null; name: string; thumbnail?: boolean }> = ({ filePath, name, thumbnail = false }) => {
+  const [failed, setFailed] = useState(false);
+  const available = Boolean(filePath?.trim());
+  return (
+    <div className={`fish-submission-photo${thumbnail ? ' fish-submission-photo--thumbnail' : ''}`}>
+      {!available || failed ? (
+        <span className="fish-submission-photo__fallback" role="img" aria-label={`Foto ${name} tidak tersedia`}>
+          {available ? 'Foto gagal dimuat' : 'Foto tidak tersedia'}
+        </span>
+      ) : (
+        <img src={getPhotoUrl(filePath!)} alt={`Foto ${name}`} onError={() => setFailed(true)} />
+      )}
+    </div>
+  );
 };
 
 const FishSubmissionsAdminPage: React.FC = () => {
@@ -110,45 +120,39 @@ const FishSubmissionsAdminPage: React.FC = () => {
     <AdminLayout>
       <div className="fish-submissions-page">
         <div className="fish-submissions-header">
-          <h1>Permintaan Nama Ikan</h1>
-          <IonButton fill="outline" onClick={fetchData} disabled={loading}>
+          <IonButton className="fish-submissions-reload" fill="outline" onClick={fetchData} disabled={loading}>
             Muat Ulang
           </IonButton>
         </div>
 
-        {error && <IonText color="danger"><p className="fish-submissions-error">{error}</p></IonText>}
+        {error && <div className="fish-submissions-error" role="alert"><IonText color="danger">{error}</IonText></div>}
         {loading ? (
-          <div className="fish-submissions-message">
+          <div className="fish-submissions-message" role="status">
             <IonSpinner name="crescent" />
             <IonText color="medium">Memuat permintaan...</IonText>
           </div>
-        ) : submissions.length === 0 ? (
+        ) : error && submissions.length === 0 ? null : submissions.length === 0 ? (
           <div className="fish-submissions-message">
             <IonText color="medium">Belum ada permintaan nama ikan.</IonText>
           </div>
         ) : (
-          <div className="fish-submissions-table-wrapper">
-            <table className="fish-submissions-table">
+          <div className="fish-submissions-table-wrapper" role="region" aria-label="Permintaan ikan, geser untuk melihat seluruh kolom" tabIndex={0}>
+            <table className="fish-submissions-table" aria-label="Permintaan ikan">
               <thead>
                 <tr>
-                  <th>Foto</th>
-                  <th>Nama Lokal</th>
-                  <th>Lokasi</th>
-                  <th>Pengusul</th>
-                  <th>Hubungkan ke Spesies</th>
-                  <th>Aksi</th>
+                  <th scope="col">Foto</th>
+                  <th scope="col">Nama Lokal</th>
+                  <th scope="col">Lokasi</th>
+                  <th scope="col">Pengusul</th>
+                  <th scope="col">Hubungkan ke Spesies</th>
+                  <th scope="col">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {submissions.map((submission) => (
                   <tr key={submission.id}>
                     <td>
-                      <img
-                        className="fish-submission-thumbnail"
-                        src={getPhotoUrl(submission.photoFilePath)}
-                        alt={`Foto ${submission.submittedName}`}
-                        onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }}
-                      />
+                      <SubmissionPhoto key={submission.photoFilePath} filePath={submission.photoFilePath} name={submission.submittedName} thumbnail />
                     </td>
                     <td>{submission.submittedName}</td>
                     <td>{submission.locationNote || '-'}</td>
@@ -156,6 +160,7 @@ const FishSubmissionsAdminPage: React.FC = () => {
                     <td>
                       <IonItem lines="none" className="fish-submissions-select-item">
                         <IonSelect
+                          aria-label={`Hubungkan ${submission.submittedName} ke spesies`}
                           value={selectedSpecies[submission.id] ?? ''}
                           placeholder="Pilih spesies"
                           onIonChange={(event) => setSelectedSpecies((current) => ({
@@ -171,26 +176,32 @@ const FishSubmissionsAdminPage: React.FC = () => {
                         </IonSelect>
                       </IonItem>
                     </td>
-                    <td className="fish-submissions-actions">
-                      <IonButton size="small" fill="clear" aria-label={`Lihat detail permintaan ${submission.submittedName}`} onClick={() => setDetailItem(submission)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      <IonButton
-                        size="small"
-                        disabled={!selectedSpecies[submission.id] || processingId === submission.id}
-                        onClick={() => handleApprove(submission)}
-                      >
-                        Setujui
-                      </IonButton>
-                      <IonButton
-                        size="small"
-                        fill="outline"
-                        color="danger"
-                        disabled={processingId === submission.id}
-                        onClick={() => setRejectingId(submission.id)}
-                      >
-                        Tolak
-                      </IonButton>
+                    <td>
+                      <div className="fish-submissions-actions">
+                        <IonButton className="fish-submissions-view" size="small" fill="clear" aria-label={`Lihat detail permintaan ${submission.submittedName}`} onClick={() => setDetailItem(submission)}>
+                          <img src="/assets/admin/species-eye.svg" width="30" height="30" alt="" />
+                        </IonButton>
+                        <IonButton
+                          className="fish-submissions-approve"
+                          aria-label={`Setujui ${submission.submittedName}`}
+                          size="small"
+                          disabled={!selectedSpecies[submission.id] || processingId === submission.id}
+                          onClick={() => handleApprove(submission)}
+                        >
+                          Setujui
+                        </IonButton>
+                        <IonButton
+                          className="fish-submissions-reject"
+                          aria-label={`Tolak ${submission.submittedName}`}
+                          size="small"
+                          fill="outline"
+                          color="danger"
+                          disabled={processingId === submission.id}
+                          onClick={() => setRejectingId(submission.id)}
+                        >
+                          Tolak
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -209,7 +220,7 @@ const FishSubmissionsAdminPage: React.FC = () => {
           { label: "Nama Lokal", value: detailItem.submittedName },
           { label: "Lokasi", value: detailItem.locationNote || "-" },
           { label: "Pengusul", value: detailItem.submitterName || "-" },
-          { label: "Foto", value: <img src={getPhotoUrl(detailItem.photoFilePath)} alt={`Foto ${detailItem.submittedName}`} /> },
+          { label: "Foto", value: <SubmissionPhoto key={`${detailItem.id}:${detailItem.photoFilePath}`} filePath={detailItem.photoFilePath} name={detailItem.submittedName} /> },
           { label: "Dibuat", value: detailItem.createdAt || "-" },
           { label: "Diperbarui", value: detailItem.updatedAt || "-" },
         ] : []}

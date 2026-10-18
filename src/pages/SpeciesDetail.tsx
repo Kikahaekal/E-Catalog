@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { isAxiosError } from 'axios';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import { IonImg, IonSpinner, IonText } from '@ionic/react';
 import { useParams } from 'react-router-dom';
 import { MainLayout } from '../layout/MainLayout';
@@ -45,10 +45,7 @@ const SpeciesDetailPage: React.FC = () => {
       })
       .catch((requestError: unknown) => {
         if (active) {
-          const message = isAxiosError<{ error?: string }>(requestError)
-            ? requestError.response?.data?.error
-            : undefined;
-          setError(message || 'Gagal memuat detail spesies.');
+          setError(getApiErrorMessage(requestError, 'Gagal memuat detail spesies.'));
         }
       })
       .finally(() => {

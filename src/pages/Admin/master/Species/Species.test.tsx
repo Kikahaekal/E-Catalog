@@ -98,11 +98,13 @@ describe('Data Spesies presentation regression', () => {
     expect(getAllWpp).toHaveBeenCalledTimes(2);
   });
 
-  it('preserves the existing behavior when a lookup fails', async () => {
+  it('shows the main list but disables forms when a lookup fails', async () => {
     vi.mocked(getAllWpp).mockRejectedValueOnce(new Error('WPP failed'));
     render(<SpeciesPage />);
     await screen.findByRole('alert');
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.getByRole('table')).toBeDefined();
+    expect((screen.getByRole('button', { name: 'Tambah Data' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: `Edit ${sample.commonName}` }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('opens detail with the exact large string ID and all relationship groups', async () => {
@@ -141,5 +143,25 @@ describe('Data Spesies presentation regression', () => {
     fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Batal' }));
     expect(screen.queryByRole('alertdialog')).toBeNull();
     expect(screen.getByRole('table')).toBeDefined();
+  });
+});
+
+describe('Supporting lookup safety', () => {
+  it.each(['iucn', 'reference', 'regency', 'wpp'])('keeps species/details safe when %s fails, then retries', async resource => {
+    const service = { iucn: getAllIucn, reference: getAllReferences, regency: getAllRegencies, wpp: getAllWpp }[resource];
+    vi.mocked(service!).mockRejectedValueOnce({response:{status:503,data:{error:'Internal detail'}}});
+    await ready(); expect((screen.getByRole('alert').textContent)).toContain('Tambah/edit dinonaktifkan');
+    fireEvent.click(screen.getByRole('button',{name:`Edit ${sample.commonName}`})); expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.click(screen.getByRole('button',{name:`Lihat detail ${sample.commonName}`})); expect(within(screen.getByRole('dialog')).getByText('Jurnal contoh (utama)')).toBeDefined();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button'));
+    fireEvent.click(screen.getByRole('button',{name:'Muat ulang lookup'})); await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
+    expect((screen.getByRole('button',{name:'Tambah Data'}) as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(screen.getByRole('button',{name:`Edit ${sample.commonName}`})); expect(within(screen.getByRole('dialog')).getByDisplayValue('Nama lokal contoh')).toBeDefined();
+  });
+  it('normalizes only verified empty IUCN/WPP and keeps main data visible',async()=>{
+    vi.mocked(getAllIucn).mockRejectedValueOnce({response:{status:404,data:{error:'Data IUCN tidak ditemukan'}}});
+    vi.mocked(getAllWpp).mockRejectedValueOnce({response:{status:404,data:{error:'Data wpp tidak ditemukan'}}});
+    await ready(); expect(screen.getByRole('alert').textContent).toContain('Belum ada IUCN');
+    expect((screen.getByRole('button',{name:'Tambah Data'}) as HTMLButtonElement).disabled).toBe(true);
   });
 });

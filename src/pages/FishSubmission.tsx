@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isAxiosError } from 'axios';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import { MainLayout } from '../layout/MainLayout';
 import { submitFishName } from '../services/fish';
 import './FishSubmissionVisual.css';
@@ -50,17 +50,7 @@ const FishSubmissionPage: React.FC = () => {
       if (fileInput) fileInput.value = '';
       setSuccessMessage('Usulan nama ikan berhasil dikirim ke kurator kami. Terima kasih atas partisipasi Anda dalam melestarikan etno-ikhtiologi Kepri!');
     } catch (requestError: unknown) {
-      if (isAxiosError<{ error?: string; message?: string }>(requestError)) {
-        const responseMessage = requestError.response?.data?.error || requestError.response?.data?.message;
-        setError(
-          responseMessage ||
-          (requestError.response
-            ? `Gagal mengirim usulan (HTTP ${requestError.response.status}).`
-            : `${requestError.message}. Periksa koneksi ke server.`)
-        );
-      } else {
-        setError('Gagal mengirim usulan nama ikan.');
-      }
+      setError(getApiErrorMessage(requestError, 'Gagal mengirim usulan nama ikan.'));
     } finally {
       setIsSubmitting(false);
     }

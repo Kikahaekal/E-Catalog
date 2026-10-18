@@ -88,9 +88,11 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Hamburger Button */}
         <button
-          className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 focus:outline-none"
+          className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle Menu"
+          aria-expanded={isMenuOpen}
+          aria-controls="public-mobile-navigation"
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {isMenuOpen ? (
@@ -104,6 +106,8 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Dropdown Menu */}
       <div
+        id="public-mobile-navigation"
+        inert={!isMenuOpen}
         className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden px-6 ${isMenuOpen ? 'max-h-64 opacity-100 pt-3 pb-4' : 'max-h-0 opacity-0 py-0'
           }`}
       >

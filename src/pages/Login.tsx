@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { isAdminRole } from '../utils/roles';
 import { IonPage, IonContent, useIonRouter } from "@ionic/react";
 import { authUser } from '../services/user';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import './Login.css';
 
 const LoginPage: React.FC = () => {
@@ -23,8 +24,8 @@ const LoginPage: React.FC = () => {
             } else {
                 router.push('/home', 'forward', 'replace');
             }
-        } catch (error: any) {
-            const msg = error.response?.data?.message || "Login gagal";
+        } catch (error: unknown) {
+            const msg = getApiErrorMessage(error, "Login gagal. Silakan coba lagi.");
             alert(msg);
         }
     };

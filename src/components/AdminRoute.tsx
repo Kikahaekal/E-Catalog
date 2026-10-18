@@ -1,6 +1,6 @@
 // src/components/AdminRoute.tsx
-import { isAdminRole } from '../utils/roles';
-import React from 'react';
+import { hasAdminSession, subscribeAuthSession } from '../utils/authSession';
+import React, { useSyncExternalStore } from 'react';
 import { Navigate } from 'react-router-dom';
 
 interface AdminRouteProps {
@@ -8,10 +8,9 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const authorized = useSyncExternalStore(subscribeAuthSession, hasAdminSession, () => false);
 
-  if (!token || !isAdminRole(role)) {
+  if (!authorized) {
     return <Navigate to="/login" replace />;
   }
 

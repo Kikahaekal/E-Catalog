@@ -5,6 +5,7 @@ import { AdminSidebar } from './components/admin/AdminSidebar';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import LoginPage from './pages/Login';
+import NotFound from './pages/NotFound';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -90,6 +91,7 @@ const App: React.FC = () => (
           </AdminRoute>
         }/>
         <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<NotFound />} />
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>

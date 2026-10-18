@@ -1,0 +1,137 @@
+/* Opt-in overlay styling: no global Ionic/theme overrides. */
+ion-modal.admin-form-modal {
+  --width: min(560px, calc(100vw - 32px));
+  --height: auto;
+  --max-height: calc(100dvh - 32px);
+  --border-radius: 30px;
+  --background: #fff;
+  --box-shadow: 0 24px 80px rgb(12 29 52 / 24%);
+  --ion-background-color: #fff;
+  --ion-text-color: #0c1d34;
+  --ion-item-background: #fff;
+  --ion-color-primary: #0f2c54;
+  --ion-color-primary-rgb: 15, 44, 84;
+  --ion-color-primary-contrast: #fff;
+  --ion-color-primary-shade: #0c1d34;
+  --ion-color-primary-tint: #274166;
+  --ion-color-medium: #456782;
+  color-scheme: light;
+  color: #0c1d34;
+  font-family: 'Inter', sans-serif;
+}
+
+ion-modal.admin-form-modal--wide { --width: min(880px, calc(100vw - 32px)); }
+ion-modal.admin-form-modal::part(content) { border: 1px solid #5690b7; }
+ion-modal.admin-form-modal .ion-page {
+  position: relative;
+  contain: layout style;
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+}
+.admin-form-modal ion-header { flex-shrink: 0; box-shadow: none; }
+.admin-form-modal ion-toolbar {
+  --background: #fff;
+  --color: #0c1d34;
+  --border-color: #d4e3ee;
+  --border-width: 0 0 1px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+.admin-form-modal ion-title { font: 700 20px/1.4 'Inter', sans-serif; padding-inline: 12px; }
+.admin-form-modal ion-header ion-button { --color: #0f2c54; width: 44px; height: 44px; }
+.admin-form-modal__body { display: flex; min-height: 0; overflow: hidden; }
+.admin-form-modal__body form { display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; }
+.admin-form-modal__fields { overflow: auto; overscroll-behavior: contain; min-height: 0; padding: 20px 24px 24px; }
+.admin-form-modal__hint { margin: 0 0 20px; color: #456782; font-size: 13px; }
+.admin-form-modal ion-item {
+  --background: #fff;
+  --color: #0c1d34;
+  --border-color: transparent;
+  --inner-border-width: 0;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 0;
+  margin: 0 0 16px;
+  min-width: 0;
+  overflow: visible;
+}
+.admin-form-modal ion-label {
+  color: #0f2c54 !important;
+  font: 600 15px/1.5 'Inter', sans-serif !important;
+  transform: none !important;
+  margin: 0 0 8px !important;
+  white-space: normal !important;
+}
+.admin-form-modal ion-item:has([required]) ion-label::after,
+.admin-form-modal .admin-form-modal__required ion-label::after { content: ' *'; color: #a32020; }
+.admin-form-modal ion-input,
+.admin-form-modal ion-select {
+  box-sizing: border-box;
+  --background: #fff;
+  --color: #0c1d34;
+  --placeholder-color: #526879;
+  --placeholder-opacity: 1;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid #5690b7;
+  border-radius: 12px;
+  font: 400 15px/1.5 'Inter', sans-serif;
+  margin: 0;
+}
+.admin-form-modal ion-select::part(text) { white-space: normal; overflow-wrap: anywhere; }
+.admin-form-modal ion-input.in-item,
+.admin-form-modal ion-select.in-item { --border-radius: 12px; border-radius: 12px; }
+.admin-form-modal ion-input:focus-within,
+.admin-form-modal ion-select:focus-within { outline: 2px solid #0f2c54; outline-offset: 2px; }
+.admin-form-modal ion-button { --border-radius: 12px; min-height: 44px; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: none; letter-spacing: normal; }
+.admin-form-modal [class$='-form-actions'] {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 24px max(16px, env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid #d4e3ee;
+}
+.admin-form-modal [class$='-form-actions'] ion-button { margin: 0; --padding-start: 20px; --padding-end: 20px; }
+.admin-form-modal [class$='-form-actions'] ion-button:first-child {
+  --color: #0f2c54;
+  --border-color: #5690b7;
+  --border-style: solid;
+  --border-width: 1px;
+  --background: #fff;
+}
+.admin-form-modal [class$='-form-actions'] ion-button[type='submit'] { --background: #0f2c54; --color: #fff; }
+.admin-form-modal .species-form-section { border-color: #d4e3ee; margin-top: 8px; padding-top: 20px; }
+.admin-form-modal .species-form-section h3 { color: #0f2c54; margin-bottom: 16px; line-height: 1.5; }
+.admin-form-modal .species-related-row { border-color: #d4e3ee; min-width: 0; }
+.admin-form-modal .species-form-section > .species-related-row,
+.admin-form-modal .species-form-section > ion-button { grid-column: 1 / -1; }
+
+/* IonSelect's Ionic alert is portalled outside its parent modal. */
+ion-alert.admin-form-select-alert { --background: #fff; --ion-text-color: #0c1d34; --ion-color-primary: #0f2c54; color-scheme: light; }
+.admin-form-select-alert .alert-title,
+.admin-form-select-alert .alert-radio-label,
+.admin-form-select-alert .alert-checkbox-label { color: #0c1d34; white-space: normal; }
+.admin-form-select-alert .alert-button { color: #0f2c54; min-height: 44px; }
+
+@media (max-width: 599px) {
+  ion-modal.admin-form-modal { --width: calc(100vw - 24px); --max-height: calc(100dvh - 24px); --border-radius: 22px; }
+  ion-modal.admin-form-modal .ion-page { max-height: calc(100dvh - 24px); }
+  .admin-form-modal ion-title { font-size: 18px; }
+  .admin-form-modal__fields { padding: 16px; }
+  .admin-form-modal [class$='-form-actions'] { padding: 14px 16px max(14px, env(safe-area-inset-bottom)); gap: 8px; }
+  .admin-form-modal [class$='-form-actions'] ion-button { flex: 1; --padding-start: 10px; --padding-end: 10px; }
+  .admin-form-modal .species-form-section,
+  .admin-form-modal .species-related-row { grid-template-columns: minmax(0, 1fr); }
+}

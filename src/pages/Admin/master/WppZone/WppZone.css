@@ -1,64 +1,84 @@
-.wpp-searchbar {
-  padding-left: 0;
-  padding-right: 0;
-  margin-bottom: 16px;
+.admin-wpp-page {
+  min-width: 0;
+  color: var(--admin-navy, #0c1d34);
+  font-family: 'Inter', var(--font-sans), sans-serif;
 }
 
-/* Container untuk header dan tombol tambah */
-.wpp-header-container {
+.admin-wpp-page .wpp-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
 }
 
-/* Judul halaman */
-.wpp-title {
+.admin-wpp-page .wpp-searchbar {
+  --background: #fff;
+  --color: #0c1d34;
+  --placeholder-color: #456782;
+  --icon-color: #4a98c9;
+  --clear-button-color: #0f2c54;
+  --box-shadow: none;
+  --border-radius: 15px;
+  flex: 1;
+  max-width: 440px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--admin-border, #5690b7);
+  border-radius: 15px;
+}
+
+.admin-wpp-page .wpp-add-button {
+  --color: #0f2c54;
+  --background-hover: #97c9ea;
+  --border-radius: 15px;
+  --padding-start: 12px;
+  --padding-end: 0;
+  flex-shrink: 0;
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
+  min-height: 44px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
-/* State Loading & Error / Data Kosong */
-.wpp-loading-container {
-  text-align: center;
-  padding: 32px 0;
-}
+.admin-wpp-page .wpp-add-button img { margin-left: 10px; }
+.admin-wpp-page .wpp-loading-container,
+.admin-wpp-page .wpp-message-container { padding: 32px 24px; border: 1px solid var(--admin-border, #5690b7); border-radius: 30px; text-align: center; }
+.admin-wpp-page .wpp-error-state p { margin: 0 0 16px; }
+.admin-wpp-page .wpp-loading-container ion-spinner { color: var(--admin-primary, #0f2c54); }
 
-.wpp-message-container {
-  padding: 16px 0;
-}
-
-/* Tabel */
-.wpp-table-wrapper {
+.admin-wpp-page .wpp-table-wrapper {
+  max-width: 100%;
   overflow-x: auto;
+  border: 1px solid var(--admin-border, #5690b7);
+  border-radius: 30px;
 }
 
-.wpp-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
+.admin-wpp-page .wpp-table-wrapper:focus-visible { outline: 2px solid var(--admin-primary, #0f2c54); outline-offset: 4px; }
+.admin-wpp-page .wpp-table { width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; font-size: 16px; line-height: 25px; }
+.admin-wpp-page .wpp-table-th { height: 44px; padding: 9px 25px; background: rgba(151, 201, 234, .3); color: var(--admin-primary, #0f2c54); border-bottom: 1px solid var(--admin-border, #5690b7); font-weight: 700; }
+.admin-wpp-page .wpp-table-th:nth-child(1) { width: 75px; }
+.admin-wpp-page .wpp-table-th:nth-child(2) { width: 18%; }
+.admin-wpp-page .wpp-table-th:nth-child(3) { width: auto; }
+.admin-wpp-page .wpp-table-th:nth-child(4) { width: 214px; }
+.admin-wpp-page .wpp-table-td { height: 77px; padding: 15px 25px; color: #23302d; overflow-wrap: anywhere; vertical-align: middle; }
+.admin-wpp-page .wpp-table-row:not(:last-child) .wpp-table-td { border-bottom: 1px solid var(--admin-border, #5690b7); }
+.admin-wpp-page .wpp-text-center { text-align: center; }
+.admin-wpp-page .wpp-row-actions { display: flex; justify-content: center; align-items: center; gap: 4px; }
+.admin-wpp-page .wpp-action-button { --padding-start: 7px; --padding-end: 7px; --border-radius: 10px; --color: #0f2c54; width: 44px; min-width: 44px; height: 44px; margin: 0; }
+.admin-wpp-page .wpp-action-button img { display: block; flex-shrink: 0; max-width: none; }
+
+@media (max-width: 639px) {
+  .admin-wpp-page .wpp-toolbar { align-items: stretch; flex-direction: column; gap: 12px; }
+  .admin-wpp-page .wpp-searchbar { width: 100%; max-width: none; }
+  .admin-wpp-page .wpp-add-button { align-self: flex-end; }
 }
 
-.wpp-table-header-row {
-  border-bottom: 2px solid var(--ion-color-light-shade);
-}
-
-.wpp-table-row {
-  border-bottom: 1px solid var(--ion-color-light-tint);
-}
-
-.wpp-table-th,
-.wpp-table-td {
-  padding: 12px 8px;
-}
-
-/* Class utilitas untuk text alignment */
-.wpp-text-center {
-  text-align: center;
-}
-
-/* Form */
+/* Form: existing modal rules. */
 .wpp-form-item {
   margin-top: 12px;
 }
