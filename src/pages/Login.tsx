@@ -35,10 +35,10 @@ const LoginPage: React.FC = () => {
             <IonContent className="login-page__content" fullscreen>
                 <main className="login-page__stage">
                     <section className="login-page__panel" aria-labelledby="login-title">
-                        <aside className="login-page__welcome" aria-label="E-Catalog Team">
+                        <aside className="login-page__welcome" aria-label="FIshKP Team">
                             <div className="login-page__brand">
                                 <p className="login-page__greeting">Welcome!</p>
-                                <p className="login-page__wordmark">E-Catalog</p>
+                                <p className="login-page__wordmark">FIshKP</p>
                                 <p className="login-page__team">Team</p>
                             </div>
                         </aside>
@@ -52,7 +52,7 @@ const LoginPage: React.FC = () => {
                         >
                             <header className="login-page__heading">
                                 <h1 id="login-title">Log In</h1>
-                                <p>Masuk menggunakan akun administrator untuk mengelola website E-Catalog.</p>
+                                <p>Masuk menggunakan akun administrator untuk mengelola website FIshKP.</p>
                             </header>
                             <div className="login-page__fields">
                                 <div className="login-page__field">

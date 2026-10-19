@@ -25,7 +25,7 @@ const SpeciesSearchPage: React.FC = () => {
         />
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium tracking-wider text-sky-200">
-            E-CATALOG IKHTIOLOGI KEPULAUAN RIAU
+            FIshKP IKHTIOLOGI KEPULAUAN RIAU
           </span>
 
           <h1 className="font-marhey text-3xl sm:text-4xl md:text-5xl font-bold tracking-wide drop-shadow-md">

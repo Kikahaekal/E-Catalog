@@ -22,7 +22,7 @@ const Home: React.FC = () => {
             <h1 className="font-marhey text-3xl sm:text-4xl md:text-5xl lg:text-[44px] text-white font-bold leading-[1.35] tracking-wide drop-shadow-lg space-y-2">
               <span className="block">Kenali Ikannya</span>
               <span className="block">Kenali Namanya</span>
-              <span className="block">Kenali Keprinya</span>
+              <span className="block">Kenali Daerahnya</span>
             </h1>
           </div>
 

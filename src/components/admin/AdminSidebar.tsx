@@ -56,7 +56,7 @@ export function AdminSidebar({ variant = 'desktop' }: { variant?: 'desktop' | 'd
   const contents = (
     <div className="admin-sidebar__inner">
       <a className="admin-sidebar__skip" href="#admin-page-content">Langsung ke konten</a>
-      <p className="admin-sidebar__brand">E-Catalog</p>
+      <p className="admin-sidebar__brand">FIshKP</p>
       <nav aria-label="Navigasi Admin" className="admin-sidebar__nav">
         {['Dashboard', 'Kelola Konten', 'Layanan Pengguna'].map((group) => (
           <div className="admin-sidebar__group" key={group}>

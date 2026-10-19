@@ -42,10 +42,13 @@ const Navbar: React.FC = () => {
         {/* Brand Logo */}
         <Link
           to="/"
-          className="font-marhey text-3xl md:text-4xl text-white tracking-wide drop-shadow-md hover:opacity-90 transition-opacity"
+          className="flex flex-col items-start text-white drop-shadow-md hover:opacity-90 transition-opacity"
           style={whiteLinkStyle}
         >
-          E-Catalog
+          <span className="font-marhey text-3xl md:text-4xl tracking-wide leading-none">FIshKP</span>
+          <span className="mt-1 font-sans text-[9px] sm:text-[10px] md:text-xs leading-tight">
+            Fisheries Information System Knowledge-based Platform
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
