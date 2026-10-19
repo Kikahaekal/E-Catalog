@@ -1,3 +1,5 @@
+import "../../../../components/admin/AdminFormModal.css";
+import { getApiErrorMessage } from "../../../../utils/apiErrors";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   IonSearchbar,
@@ -7,18 +9,16 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonContent,
   IonItem,
   IonLabel,
   IonInput,
   IonSpinner,
   IonText,
-  IonBadge,
   IonButtons,
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllRegencies, createRegency, editRegency, deleteRegency, Regency } from "../../../../services/regency"; 
 import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
@@ -58,10 +58,10 @@ const RegencyPage: React.FC = () => {
     try {
       const response = await getAllRegencies();
       setRegencyList(response.data || []);
-    } catch (err: any) {
-      console.error("Gagal mengambil data daerah:", err);
+    } catch (err: unknown) {
+
       const errorMessage =
-        err.response?.data?.error || "Gagal memuat data daerah dari server.";
+        getApiErrorMessage(err, "Gagal memuat data daerah dari server.");
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -96,8 +96,8 @@ const RegencyPage: React.FC = () => {
       setNewProvince("");
       setIsModalOpen(false);
       fetchRegencies(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menyimpan data kabupaten/kota";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menyimpan data kabupaten/kota");
       alert(errMsg);
     } finally {
       setIsSubmitting(false);
@@ -123,8 +123,8 @@ const RegencyPage: React.FC = () => {
       setToastMessage("Data kabupaten/kota berhasil diperbarui");
       setIsEditModalOpen(false);
       fetchRegencies(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal memperbarui data kabupaten/kota";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal memperbarui data kabupaten/kota");
       alert(errMsg);
     } finally {
       setIsEditing(false);
@@ -139,8 +139,8 @@ const RegencyPage: React.FC = () => {
       await deleteRegency(deletingId);
       setToastMessage("Data kabupaten/kota berhasil dihapus");
       fetchRegencies(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menghapus data kabupaten/kota";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menghapus data kabupaten/kota");
       alert(errMsg);
     } finally {
       setDeletingId(null);
@@ -149,46 +149,44 @@ const RegencyPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="ion-padding">
-        <IonSearchbar
-          value={searchText}
-          onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Cari nama kabupaten/kota atau provinsi..."
-          className="regency-searchbar"
-        />
-
-        <div className="regency-header-container">
-          <h2 className="regency-title">
-            Data Daerah / Kabupaten
-          </h2>
-          <IonButton onClick={() => setIsModalOpen(true)}>
-            <IonIcon slot="start" icon={addOutline} />
+      <div className="admin-regency-page">
+        <div className="regency-toolbar">
+          <IonSearchbar
+            value={searchText}
+            onIonInput={(e) => setSearchText(e.detail.value!)}
+            placeholder="Cari nama kabupaten/kota atau provinsi..."
+            aria-label="Cari nama kabupaten/kota atau provinsi"
+            className="regency-searchbar"
+          />
+          <IonButton className="regency-add-button" fill="clear" onClick={() => setIsModalOpen(true)}>
             Tambah Data
+            <img src="/assets/admin/species-add.svg" width="25" height="25" alt="" />
           </IonButton>
         </div>
 
         {loading ? (
-          <div className="regency-loading-container">
+          <div className="regency-loading-container" role="status">
             <IonSpinner name="crescent" />
             <p><IonText color="medium">Memuat data...</IonText></p>
           </div>
         ) : error ? (
-          <div className="regency-message-container">
-            <IonText color="danger">{error}</IonText>
+          <div className="regency-message-container regency-error-state" role="alert">
+            <p><IonText color="danger">{error}</IonText></p>
+            <IonButton onClick={fetchRegencies}>Coba lagi</IonButton>
           </div>
         ) : filteredRegencies.length === 0 ? (
           <div className="regency-message-container">
-            <IonText color="medium">Data daerah tidak ditemukan.</IonText>
+            <IonText color="medium">{regencyList.length === 0 ? "Belum ada data daerah." : "Tidak ada daerah yang cocok dengan pencarian."}</IonText>
           </div>
         ) : (
-          <div className="regency-table-wrapper">
-            <table className="regency-table">
+          <div className="regency-table-wrapper" role="region" aria-label="Data Daerah, geser untuk melihat seluruh kolom" tabIndex={0}>
+            <table className="regency-table" aria-label="Data Daerah">
               <thead>
                 <tr className="regency-table-header-row">
-                  <th className="regency-table-th">No</th>
-                  <th className="regency-table-th">Nama Kabupaten/Kota</th>
-                  <th className="regency-table-th">Provinsi</th>
-                  <th className="regency-table-th regency-text-center">Aksi</th>
+                  <th scope="col" className="regency-table-th">No</th>
+                  <th scope="col" className="regency-table-th">Nama Kabupaten/Kota</th>
+                  <th scope="col" className="regency-table-th">Provinsi</th>
+                  <th scope="col" className="regency-table-th regency-text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -197,34 +195,36 @@ const RegencyPage: React.FC = () => {
                     <td className="regency-table-td">{index + 1}</td>
                     <td className="regency-table-td">{item.name}</td>
                     <td className="regency-table-td">
-                      <IonBadge color="primary">{item.province}</IonBadge>
+                      <span>{item.province}</span>
                     </td>
                     <td className="regency-table-td regency-text-center">
-                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.name}`} onClick={() => setDetailItem(item)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      {/* Tombol Edit */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="warning"
-                        onClick={() => openEditModal(item)}
-                      >
-                        <IonIcon slot="icon-only" icon={pencilOutline} />
-                      </IonButton>
-                      
-                      {/* Tombol Hapus */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="danger"
-                        onClick={() => {
-                          setDeletingId(item.id);
-                          setIsAlertDeleteOpen(true);
-                        }}
-                      >
-                        <IonIcon slot="icon-only" icon={trashOutline} />
-                      </IonButton>
+                      <div className="regency-row-actions">
+                        <IonButton className="regency-action-button" fill="clear" size="small" aria-label={`Lihat detail ${item.name}`} onClick={() => setDetailItem(item)}>
+                          <img src="/assets/admin/species-eye.svg" width="30" height="30" alt="" />
+                        </IonButton>
+                        {/* Tombol Edit */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="regency-action-button" aria-label={`Edit ${item.name}`}
+                          onClick={() => openEditModal(item)}
+                        >
+                          <img src="/assets/admin/species-edit.svg" width="19.532" height="19.531" alt="" />
+                        </IonButton>
+
+                        {/* Tombol Hapus */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="regency-action-button" aria-label={`Hapus ${item.name}`}
+                          onClick={() => {
+                            setDeletingId(item.id);
+                            setIsAlertDeleteOpen(true);
+                          }}
+                        >
+                          <img src="/assets/admin/species-delete.svg" width="18.75" height="20.3125" alt="" />
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -246,22 +246,24 @@ const RegencyPage: React.FC = () => {
       />
 
       {/* Modal Tambah Data */}
-      <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Tambah Data Kabupaten/Kota" aria-labelledby="regency-create-title" isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Tambah Data Kabupaten/Kota</IonTitle>
+            <IonTitle id="regency-create-title">Tambah Data Kabupaten/Kota</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleCreate}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Nama Kabupaten/Kota</IonLabel>
-              <IonInput
+              <IonInput aria-label="Nama Kabupaten/Kota"
                 value={newName}
                 placeholder="Contoh: Kabupaten Bintan, Kota Tanjungpinang"
                 onIonInput={(e) => setNewName(e.detail.value!)}
@@ -270,13 +272,14 @@ const RegencyPage: React.FC = () => {
             </IonItem>
             <IonItem className="regency-form-item">
               <IonLabel position="stacked">Provinsi</IonLabel>
-              <IonInput
+              <IonInput aria-label="Provinsi"
                 value={newProvince}
                 placeholder="Contoh: Kepulauan Riau"
                 onIonInput={(e) => setNewProvince(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="regency-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsModalOpen(false)}>
                 Batal
@@ -286,26 +289,28 @@ const RegencyPage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       {/* Modal Edit Data */}
-      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Edit Data Kabupaten/Kota" aria-labelledby="regency-edit-title" isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Edit Data Kabupaten/Kota</IonTitle>
+            <IonTitle id="regency-edit-title">Edit Data Kabupaten/Kota</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsEditModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsEditModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleEdit}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Nama Kabupaten/Kota</IonLabel>
-              <IonInput
+              <IonInput aria-label="Nama Kabupaten/Kota"
                 value={editName}
                 placeholder="Contoh: Kabupaten Bintan"
                 onIonInput={(e) => setEditName(e.detail.value!)}
@@ -314,13 +319,14 @@ const RegencyPage: React.FC = () => {
             </IonItem>
             <IonItem className="regency-form-item">
               <IonLabel position="stacked">Provinsi</IonLabel>
-              <IonInput
+              <IonInput aria-label="Provinsi"
                 value={editProvince}
                 placeholder="Contoh: Kepulauan Riau"
                 onIonInput={(e) => setEditProvince(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="regency-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsEditModalOpen(false)}>
                 Batal
@@ -330,7 +336,7 @@ const RegencyPage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       <IonAlert

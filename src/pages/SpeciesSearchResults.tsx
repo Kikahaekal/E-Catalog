@@ -1,7 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '../layout/MainLayout';
-import { getAllSpecies, Species } from '../services/species';
+import { getApiErrorMessage } from '../utils/apiErrors';
+import { apiClient } from '../services/api';
+import { getAllSpecies, Species, SpeciesLocalName } from '../services/species';
+
+const getLocalName = (entry: SpeciesLocalName): string =>
+  entry.name || entry.submittedName || (typeof entry.localName === 'string' ? entry.localName : entry.localName?.name) || '';
+
+// Temporary filtering for the verified, complete, unpaginated GET response.
+// If the API becomes paginated, filtering must move to the server before pagination.
+const matchesSearch = (item: Species, query: string): boolean => [
+  item.commonName, item.scientificName, item.distributionText,
+  ...(item.localNames || []).flatMap(entry => [getLocalName(entry), entry.regionNote]),
+  ...(item.regencies || []).flatMap(entry => [entry.regency.name, entry.regency.province]),
+].some(value => value?.toLowerCase().includes(query));
+
+const getPhotoUrl = (filePath?: string): string | undefined => {
+  const path = filePath?.trim().replace(/\\/g, '/');
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      const url = new URL(path);
+      return url.hostname ? url.href : undefined;
+    } catch { return undefined; }
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path)) return undefined;
+  const base = (apiClient.defaults.baseURL || '').replace(/\/+$/, '');
+  const relative = path.replace(/^\/+/, '').replace(/\/{2,}/g, '/');
+  // Both configured prefixes and stored paths may contain the uploads segment.
+  const suffix = /\/uploads$/i.test(base) && /^uploads\//i.test(relative)
+    ? relative.slice('uploads/'.length) : relative;
+  return `${base}/${suffix}`;
+};
+
+const SearchPhoto: React.FC<{ filePath?: string; name: string }> = ({ filePath, name }) => {
+  const [failed, setFailed] = useState(false);
+  const url = getPhotoUrl(filePath);
+  return url && !failed ? (
+    <img src={url} alt={name} className="h-12 w-16 rounded-md object-cover" onError={() => setFailed(true)} />
+  ) : (
+    <span className="flex h-12 w-16 items-center justify-center rounded-md bg-slate-100 text-[10px] text-slate-400" role="img" aria-label={`Foto ${name} tidak tersedia`}>
+      {url ? 'Foto gagal dimuat' : 'Tanpa foto'}
+    </span>
+  );
+};
 
 const SpeciesSearchResultsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,11 +69,11 @@ const SpeciesSearchResultsPage: React.FC = () => {
 
     getAllSpecies(nameParam)
       .then((response) => {
-        if (active) setSpecies(response.data || []);
+        if (active) setSpecies((response.data || []).filter(item => matchesSearch(item, nameParam.toLowerCase())));
       })
-      .catch((requestError: any) => {
+      .catch((requestError: unknown) => {
         if (active) {
-          setError(requestError.response?.data?.error || 'Gagal memuat hasil pencarian.');
+          setError(getApiErrorMessage(requestError, 'Gagal memuat hasil pencarian.'));
         }
       })
       .finally(() => {
@@ -176,28 +219,13 @@ const SpeciesSearchResultsPage: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
                     {species.map((item) => {
-                      const localNamesList = item.localNames
-                        ?.map((ln: any) => ln.name || ln.submittedName || (typeof ln.localName === 'string' ? ln.localName : ln.localName?.name))
-                        .filter(Boolean) || [];
+                      const localNamesList = item.localNames?.map(getLocalName).filter(Boolean) || [];
                       const photoPath = item.photos?.[0]?.filePath;
 
                       return (
                         <tr key={item.id} className="hover:bg-sky-50/50">
                           <td className="px-6 py-4">
-                            {photoPath ? (
-                              <img
-                                src={photoPath.startsWith('http') ? photoPath : `http://localhost:3000${photoPath}`}
-                                alt={item.commonName}
-                                className="h-12 w-16 rounded-md object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/assets/school-fish.jpg';
-                                }}
-                              />
-                            ) : (
-                              <span className="flex h-12 w-16 items-center justify-center rounded-md bg-slate-100 text-[10px] text-slate-400">
-                                Tanpa foto
-                              </span>
-                            )}
+                            <SearchPhoto key={`${item.id}:${photoPath || ''}`} filePath={photoPath} name={item.commonName} />
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-semibold text-slate-900">{item.commonName}</div>

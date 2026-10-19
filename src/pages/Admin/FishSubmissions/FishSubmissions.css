@@ -1,87 +1,43 @@
 .fish-submissions-page {
   width: 100%;
+  min-width: 0;
+  color: var(--admin-navy, #0c1d34);
+  font-family: 'Inter', var(--font-sans), sans-serif;
 }
-
-.fish-submissions-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.fish-submissions-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.fish-submissions-error {
-  margin: 0 0 12px;
-}
-
-.fish-submissions-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 32px 0;
-}
-
-.fish-submissions-table-wrapper {
-  overflow-x: auto;
-}
-
-.fish-submissions-table {
-  width: 100%;
-  min-width: 850px;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.fish-submissions-table thead {
-  border-bottom: 2px solid var(--ion-color-light-shade);
-}
-
-.fish-submissions-table tbody tr {
-  border-bottom: 1px solid var(--ion-color-light-tint);
-}
-
-.fish-submissions-table th,
-.fish-submissions-table td {
-  padding: 12px 8px;
-  vertical-align: middle;
-}
-
-.fish-submission-thumbnail {
-  display: block;
-  width: 88px;
-  height: 66px;
-  border-radius: 4px;
-  object-fit: cover;
-  background: var(--ion-color-light);
-}
-
-.fish-submissions-select-item {
-  --padding-start: 0;
-  --inner-padding-end: 0;
-  min-width: 220px;
-}
-
-.fish-submissions-actions {
-  white-space: nowrap;
-}
-
-.fish-submissions-actions ion-button + ion-button {
-  margin-left: 4px;
-}
-
-@media (max-width: 600px) {
-  .fish-submissions-header {
-    align-items: flex-start;
-  }
-
-  .fish-submissions-header h1 {
-    font-size: 1.3rem;
-  }
+.fish-submissions-page .fish-submissions-header { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
+.fish-submissions-page ion-button { min-height: 44px; margin: 0; font: inherit; font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: normal; --border-radius: 12px; }
+.fish-submissions-page .fish-submissions-reload { --color: #0f2c54; --border-color: #5690b7; --border-width: 1px; --padding-start: 20px; --padding-end: 20px; }
+.fish-submissions-page .fish-submissions-message,
+.fish-submissions-page .fish-submissions-error { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 32px 24px; border: 1px solid var(--admin-border, #5690b7); border-radius: 30px; text-align: center; }
+.fish-submissions-page .fish-submissions-error { margin-bottom: 20px; }
+.fish-submissions-page ion-spinner { color: var(--admin-primary, #0f2c54); flex-shrink: 0; }
+.fish-submissions-page .fish-submissions-table-wrapper { max-width: 100%; overflow-x: auto; border: 1px solid var(--admin-border, #5690b7); border-radius: 30px; }
+.fish-submissions-page .fish-submissions-table-wrapper:focus-visible { outline: 2px solid #0f2c54; outline-offset: 4px; }
+.fish-submissions-page .fish-submissions-table { width: 100%; min-width: 1060px; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; font-size: 16px; line-height: 25px; }
+.fish-submissions-page .fish-submissions-table th { padding: 9px 20px; height: 44px; background: rgba(151,201,234,.3); border-bottom: 1px solid #5690b7; color: #0f2c54; font-weight: 700; }
+.fish-submissions-page .fish-submissions-table th:nth-child(1) { width: 128px; }
+.fish-submissions-page .fish-submissions-table th:nth-child(2) { width: 16%; }
+.fish-submissions-page .fish-submissions-table th:nth-child(3),
+.fish-submissions-page .fish-submissions-table th:nth-child(4) { width: auto; }
+.fish-submissions-page .fish-submissions-table th:nth-child(5) { width: 260px; }
+.fish-submissions-page .fish-submissions-table th:nth-child(6) { width: 260px; text-align: center; }
+.fish-submissions-page .fish-submissions-table td { height: 100px; padding: 15px 20px; vertical-align: middle; overflow-wrap: anywhere; color: #23302d; }
+.fish-submissions-page .fish-submissions-table tbody tr:not(:last-child) td { border-bottom: 1px solid #5690b7; }
+.fish-submissions-page .fish-submissions-select-item { --padding-start: 0; --inner-padding-end: 0; --background: #fff; --color: #0c1d34; min-width: 0; }
+.fish-submissions-page ion-select { width: 100%; min-width: 0; font: inherit; --placeholder-color: #456782; --placeholder-opacity: 1; }
+.fish-submissions-page .fish-submissions-actions { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.fish-submissions-page .fish-submissions-view { width: 44px; min-width: 44px; --padding-start: 7px; --padding-end: 7px; }
+.fish-submissions-page .fish-submissions-view img { max-width: none; flex-shrink: 0; }
+.fish-submissions-page .fish-submissions-approve { --background: #0f2c54; --background-hover: #0c1d34; --color: #fff; --padding-start: 12px; --padding-end: 12px; }
+.fish-submissions-page .fish-submissions-reject { --padding-start: 12px; --padding-end: 12px; --border-width: 1px; }
+/* These named photo classes also apply inside the Ionic detail portal. */
+.fish-submission-photo { max-width: 100%; }
+.fish-submission-photo img { display: block; width: min(100%, 360px); max-height: 260px; object-fit: contain; border-radius: 12px; }
+.fish-submission-photo--thumbnail { width: 88px; height: 66px; }
+.fish-submission-photo--thumbnail img { width: 88px; height: 66px; object-fit: cover; }
+.fish-submission-photo__fallback { display: flex; align-items: center; justify-content: center; min-height: 66px; padding: 8px; border: 1px solid #5690b7; border-radius: 12px; background: rgba(151,201,234,.3); color: #0f2c54; font-family: 'Inter', sans-serif; font-size: 12px; line-height: 17px; text-align: center; }
+.fish-submission-photo--thumbnail .fish-submission-photo__fallback { height: 100%; }
+@media (max-width: 639px) {
+  .fish-submissions-page .fish-submissions-header { flex-wrap: wrap; }
+  .fish-submissions-page .fish-submissions-message { flex-direction: column; }
 }

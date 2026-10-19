@@ -1,3 +1,5 @@
+import "../../../../components/admin/AdminFormModal.css";
+import { getApiErrorMessage, isEmptyMasterList } from "../../../../utils/apiErrors";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   IonSearchbar,
@@ -7,18 +9,16 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonContent,
   IonItem,
   IonLabel,
   IonInput,
   IonSpinner,
   IonText,
-  IonBadge,
   IonButtons,
   IonToast,
   IonAlert
 } from "@ionic/react";
-import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { getAllWpp, createWpp, editWpp, deleteWpp, Wpp } from "../../../../services/wpp"; 
 import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
@@ -58,10 +58,11 @@ const WppZonePage: React.FC = () => {
     try {
       const response = await getAllWpp();
       setWppList(response.data || []);
-    } catch (err: any) {
-      console.error("Gagal mengambil data WPP:", err);
+    } catch (err: unknown) {
+      if (isEmptyMasterList(err, "wpp")) { setWppList([]); return; }
+
       const errorMessage =
-        err.response?.data?.error || "Gagal memuat data WPP dari server.";
+        getApiErrorMessage(err, "Gagal memuat data WPP dari server.");
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -96,8 +97,8 @@ const WppZonePage: React.FC = () => {
       setNewDescription("");
       setIsModalOpen(false);
       fetchWpp(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menyimpan data WPP";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menyimpan data WPP");
       alert(errMsg);
     } finally {
       setIsSubmitting(false);
@@ -123,8 +124,8 @@ const WppZonePage: React.FC = () => {
       setToastMessage("Data WPP berhasil diperbarui");
       setIsEditModalOpen(false);
       fetchWpp(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal memperbarui data WPP";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal memperbarui data WPP");
       alert(errMsg);
     } finally {
       setIsEditing(false);
@@ -139,8 +140,8 @@ const WppZonePage: React.FC = () => {
       await deleteWpp(deletingId);
       setToastMessage("Data WPP berhasil dihapus");
       fetchWpp(); // Refresh data tabel
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Gagal menghapus data WPP";
+    } catch (err: unknown) {
+      const errMsg = getApiErrorMessage(err, "Gagal menghapus data WPP");
       alert(errMsg);
     } finally {
       setDeletingId(null);
@@ -149,46 +150,44 @@ const WppZonePage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="ion-padding">
-        <IonSearchbar
-          value={searchText}
-          onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Cari kode atau deskripsi WPP..."
-          className="wpp-searchbar"
-        />
-
-        <div className="wpp-header-container">
-          <h2 className="wpp-title">
-            Data WPP Zone
-          </h2>
-          <IonButton onClick={() => setIsModalOpen(true)}>
-            <IonIcon slot="start" icon={addOutline} />
+      <div className="admin-wpp-page">
+        <div className="wpp-toolbar">
+          <IonSearchbar
+            value={searchText}
+            onIonInput={(e) => setSearchText(e.detail.value!)}
+            placeholder="Cari kode atau deskripsi WPP..."
+            aria-label="Cari kode atau deskripsi WPP"
+            className="wpp-searchbar"
+          />
+          <IonButton className="wpp-add-button" fill="clear" onClick={() => setIsModalOpen(true)}>
             Tambah Data
+            <img src="/assets/admin/species-add.svg" width="25" height="25" alt="" />
           </IonButton>
         </div>
 
         {loading ? (
-          <div className="wpp-loading-container">
+          <div className="wpp-loading-container" role="status">
             <IonSpinner name="crescent" />
             <p><IonText color="medium">Memuat data...</IonText></p>
           </div>
         ) : error ? (
-          <div className="wpp-message-container">
-            <IonText color="danger">{error}</IonText>
+          <div className="wpp-message-container wpp-error-state" role="alert">
+            <p><IonText color="danger">{error}</IonText></p>
+            <IonButton onClick={fetchWpp}>Coba lagi</IonButton>
           </div>
         ) : filteredWpp.length === 0 ? (
           <div className="wpp-message-container">
-            <IonText color="medium">Data WPP tidak ditemukan.</IonText>
+            <IonText color="medium">{wppList.length === 0 ? "Belum ada data WPP." : "Tidak ada WPP yang cocok dengan pencarian."}</IonText>
           </div>
         ) : (
-          <div className="wpp-table-wrapper">
-            <table className="wpp-table">
+          <div className="wpp-table-wrapper" role="region" aria-label="Data WPP, geser untuk melihat seluruh kolom" tabIndex={0}>
+            <table className="wpp-table" aria-label="Data WPP">
               <thead>
                 <tr className="wpp-table-header-row">
-                  <th className="wpp-table-th">No</th>
-                  <th className="wpp-table-th">Kode</th>
-                  <th className="wpp-table-th">Deskripsi</th>
-                  <th className="wpp-table-th wpp-text-center">Aksi</th>
+                  <th scope="col" className="wpp-table-th">No</th>
+                  <th scope="col" className="wpp-table-th">Kode</th>
+                  <th scope="col" className="wpp-table-th">Deskripsi</th>
+                  <th scope="col" className="wpp-table-th wpp-text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,35 +195,37 @@ const WppZonePage: React.FC = () => {
                   <tr key={item.id} className="wpp-table-row">
                     <td className="wpp-table-td">{index + 1}</td>
                     <td className="wpp-table-td">
-                      <IonBadge color="primary">{item.code}</IonBadge>
+                      <span>{item.code}</span>
                     </td>
                     <td className="wpp-table-td">{item.description}</td>
                     <td className="wpp-table-td wpp-text-center">
-                      <IonButton fill="clear" size="small" aria-label={`Lihat detail WPP ${item.code}`} onClick={() => setDetailItem(item)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      {/* Tombol Edit */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="warning"
-                        onClick={() => openEditModal(item)}
-                      >
-                        <IonIcon slot="icon-only" icon={pencilOutline} />
-                      </IonButton>
-                      
-                      {/* Tombol Hapus */}
-                      <IonButton 
-                        fill="clear" 
-                        size="small" 
-                        color="danger"
-                        onClick={() => {
-                          setDeletingId(item.id);
-                          setIsAlertDeleteOpen(true);
-                        }}
-                      >
-                        <IonIcon slot="icon-only" icon={trashOutline} />
-                      </IonButton>
+                      <div className="wpp-row-actions">
+                        <IonButton className="wpp-action-button" fill="clear" size="small" aria-label={`Lihat detail WPP ${item.code}`} onClick={() => setDetailItem(item)}>
+                          <img src="/assets/admin/species-eye.svg" width="30" height="30" alt="" />
+                        </IonButton>
+                        {/* Tombol Edit */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="wpp-action-button" aria-label={`Edit ${item.code}`}
+                          onClick={() => openEditModal(item)}
+                        >
+                          <img src="/assets/admin/species-edit.svg" width="19.532" height="19.531" alt="" />
+                        </IonButton>
+
+                        {/* Tombol Hapus */}
+                        <IonButton
+                          fill="clear"
+                          size="small"
+                          className="wpp-action-button" aria-label={`Hapus ${item.code}`}
+                          onClick={() => {
+                            setDeletingId(item.id);
+                            setIsAlertDeleteOpen(true);
+                          }}
+                        >
+                          <img src="/assets/admin/species-delete.svg" width="18.75" height="20.3125" alt="" />
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -246,22 +247,24 @@ const WppZonePage: React.FC = () => {
       />
 
       {/* Modal Tambah Data */}
-      <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Tambah Data WPP" aria-labelledby="wppzone-create-title" isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Tambah Data WPP</IonTitle>
+            <IonTitle id="wppzone-create-title">Tambah Data WPP</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleCreate}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Kode WPP</IonLabel>
-              <IonInput
+              <IonInput aria-label="Kode WPP"
                 value={newCode}
                 placeholder="Contoh: 711"
                 onIonInput={(e) => setNewCode(e.detail.value!)}
@@ -270,13 +273,14 @@ const WppZonePage: React.FC = () => {
             </IonItem>
             <IonItem className="wpp-form-item">
               <IonLabel position="stacked">Deskripsi</IonLabel>
-              <IonInput
+              <IonInput aria-label="Deskripsi"
                 value={newDescription}
                 placeholder="Contoh: Perairan Selat Karimata"
                 onIonInput={(e) => setNewDescription(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="wpp-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsModalOpen(false)}>
                 Batal
@@ -286,26 +290,28 @@ const WppZonePage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       {/* Modal Edit Data */}
-      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
+      <IonModal className="admin-form-modal" aria-label="Edit Data WPP" aria-labelledby="wppzone-edit-title" isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Edit Data WPP</IonTitle>
+            <IonTitle id="wppzone-edit-title">Edit Data WPP</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsEditModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsEditModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleEdit}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Kode WPP</IonLabel>
-              <IonInput
+              <IonInput aria-label="Kode WPP"
                 value={editCode}
                 placeholder="Contoh: 711"
                 onIonInput={(e) => setEditCode(e.detail.value!)}
@@ -314,13 +320,14 @@ const WppZonePage: React.FC = () => {
             </IonItem>
             <IonItem className="wpp-form-item">
               <IonLabel position="stacked">Deskripsi</IonLabel>
-              <IonInput
+              <IonInput aria-label="Deskripsi"
                 value={editDescription}
                 placeholder="Contoh: Perairan Selat Karimata"
                 onIonInput={(e) => setEditDescription(e.detail.value!)}
                 required
               />
             </IonItem>
+            </div>
             <div className="wpp-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsEditModalOpen(false)}>
                 Batal
@@ -330,7 +337,7 @@ const WppZonePage: React.FC = () => {
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       <IonAlert

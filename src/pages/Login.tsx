@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { IonCard, IonItem, IonInput, IonCardTitle, IonCardSubtitle, IonButton, useIonRouter } from "@ionic/react";
+import { isAdminRole } from '../utils/roles';
+import { IonPage, IonContent, useIonRouter } from "@ionic/react";
 import { authUser } from '../services/user';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import './Login.css';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const router = useIonRouter();
 
     const handleLogin = async () => {
@@ -16,45 +19,85 @@ const LoginPage: React.FC = () => {
             localStorage.setItem('role', data.role);
             window.dispatchEvent(new Event('admin-auth-changed'));
 
-            if (data.role === 'admin') {
+            if (isAdminRole(data.role)) {
                 router.push('/admin', 'forward', 'replace');
             } else {
                 router.push('/home', 'forward', 'replace');
             }
-        } catch (error: any) {
-            const msg = error.response?.data?.message || "Login gagal";
+        } catch (error: unknown) {
+            const msg = getApiErrorMessage(error, "Login gagal. Silakan coba lagi.");
             alert(msg);
         }
     };
 
     return (
-        <div className="form">
-            <IonCard className="form-card ion-padding">
-                <div className="form-item">
-                    <IonCardTitle>Login</IonCardTitle>
-                    <IonCardSubtitle className="ion-margin-bottom ion-margin-top">Masukkan data anda</IonCardSubtitle>
-                    <IonItem>
-                        <IonInput 
-                            label="Email" 
-                            type="email" 
-                            labelPlacement="floating"
-                            value={email}
-                            onIonInput={(e) => setEmail(e.detail.value!)}
-                        />
-                    </IonItem>
-                    <IonItem>
-                        <IonInput 
-                            label="Password" 
-                            type="password" 
-                            labelPlacement="floating"
-                            value={password}
-                            onIonInput={(e) => setPassword(e.detail.value!)}
-                        />
-                    </IonItem>
-                    <IonButton className="btn-login" onClick={handleLogin}>Kirim</IonButton>
-                </div>
-            </IonCard>
-        </div>
+        <IonPage className="login-page">
+            <IonContent className="login-page__content" fullscreen>
+                <main className="login-page__stage">
+                    <section className="login-page__panel" aria-labelledby="login-title">
+                        <aside className="login-page__welcome" aria-label="E-Catalog Team">
+                            <div className="login-page__brand">
+                                <p className="login-page__greeting">Welcome!</p>
+                                <p className="login-page__wordmark">E-Catalog</p>
+                                <p className="login-page__team">Team</p>
+                            </div>
+                        </aside>
+                        <form
+                            className="login-page__form"
+                            noValidate
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                void handleLogin();
+                            }}
+                        >
+                            <header className="login-page__heading">
+                                <h1 id="login-title">Log In</h1>
+                                <p>Masuk menggunakan akun administrator untuk mengelola website E-Catalog.</p>
+                            </header>
+                            <div className="login-page__fields">
+                                <div className="login-page__field">
+                                    <label htmlFor="login-email">Email Pengguna</label>
+                                    <input
+                                        id="login-email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="username"
+                                        placeholder="Masukkan Email Pengguna"
+                                        value={email}
+                                        onChange={(event) => setEmail(event.target.value)}
+                                    />
+                                </div>
+                                <div className="login-page__field">
+                                    <label htmlFor="login-password">Kata Sandi</label>
+                                    <div className="login-page__password">
+                                        <input
+                                            id="login-password"
+                                            name="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            autoComplete="current-password"
+                                            placeholder="Masukkan Kata sandi"
+                                            value={password}
+                                            onChange={(event) => setPassword(event.target.value)}
+                                        />
+                                        <button
+                                            className="login-page__visibility"
+                                            type="button"
+                                            aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                                            aria-pressed={showPassword}
+                                            aria-controls="login-password"
+                                            onClick={() => setShowPassword((visible) => !visible)}
+                                        >
+                                            <img src="/assets/login-eye-slash.svg" alt="" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button className="login-page__submit" type="submit">Masuk</button>
+                        </form>
+                    </section>
+                </main>
+            </IonContent>
+        </IonPage>
     );
 };
 

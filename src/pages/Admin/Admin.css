@@ -1,0 +1,31 @@
+.admin-dashboard__intro { margin: 0 0 15px; color: var(--admin-blue); font-size: 16px; line-height: 33px; }
+.admin-dashboard__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px; }
+.admin-stat-card { display: grid; grid-template-columns: 60px 1px minmax(0, 1fr); align-items: center; gap: 30px; min-height: 168px; padding: 40px 35px; border: 1px solid var(--admin-border); border-radius: 30px; background: #fff; }
+.admin-stat-card__icon { display: grid; place-items: center; }
+.admin-stat-card__icon img { display: block; max-width: none; }
+.admin-stat-card__divider { position: relative; width: 1px; height: 86px; }
+.admin-stat-card__divider img { position: absolute; top: 50%; left: 50%; max-width: none; transform: translate(-50%, -50%) rotate(90deg); }
+.admin-stat-card__body { min-width: 0; }
+.admin-stat-card h2 { margin: 0 0 20px; color: var(--admin-blue); font-family: var(--font-marhey, 'Marhey', cursive); font-size: 20px; font-weight: 700; line-height: 33px; }
+.admin-stat-card__value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; margin: 0; line-height: 33px; }
+.admin-stat-card__value strong { color: var(--admin-primary); font-size: 40px; font-weight: 700; overflow-wrap: anywhere; }
+.admin-stat-card__value span { color: var(--admin-blue); font-size: 16px; font-weight: 700; }
+.admin-stat-card__loading { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--admin-primary); font-size: 14px; }
+.admin-stat-card__loading ion-spinner { width: 24px; height: 24px; }
+.admin-stat-card__empty { margin: 12px 0 0; color: var(--admin-primary); font-size: 14px; line-height: 22px; }
+.admin-stat-card__error p { margin: 0 0 12px; color: #9b2525; font-size: 14px; line-height: 22px; }
+.admin-dashboard__note { margin: 20px 0 0; color: #456782; font-size: 13px; line-height: 22px; }
+
+@media (max-width: 1279px) {
+  .admin-stat-card { padding: 28px 24px; gap: 20px; }
+}
+
+@media (max-width: 767px) {
+  .admin-dashboard__stats { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .admin-stat-card { padding: 28px 24px; }
+}
+
+@media (max-width: 374px) {
+  .admin-stat-card { gap: 14px; padding: 24px 16px; }
+  .admin-stat-card h2 { font-size: 18px; }
+}

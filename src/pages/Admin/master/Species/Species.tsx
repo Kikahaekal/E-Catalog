@@ -1,29 +1,32 @@
+import "../../../../components/admin/AdminFormModal.css";
+import { getApiErrorMessage, isEmptyMasterList } from "../../../../utils/apiErrors";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   IonSearchbar, IonButton, IonIcon, IonModal, IonHeader,
-  IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
-  IonInput, IonSpinner, IonText, IonBadge, IonButtons,
+  IonToolbar, IonTitle, IonItem, IonLabel,
+  IonInput, IonSpinner, IonText, IonButtons,
   IonToast, IonAlert, IonSelect, IonSelectOption
 } from "@ionic/react";
-import { addOutline, closeOutline, eyeOutline, pencilOutline, trashOutline } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { AdminLayout } from "../../../../layout/AdminLayout";
 import { AdminRecordDetails } from "../../../../components/AdminRecordDetails";
 import { getAllSpecies, createSpecies, editSpecies, deleteSpecies, Species, SpeciesPayload } from "../../../../services/species"; 
 import { getAllIucn, Iucn } from "../../../../services/iucn"; 
 import { getAllReferences, Reference } from "../../../../services/reference"; 
-import { getAllRegencies } from "../../../../services/regency"; 
-import { getAllWpp } from "../../../../services/wpp"; 
+import { getAllRegencies, Regency } from "../../../../services/regency";
+import { getAllWpp, Wpp } from "../../../../services/wpp";
 import "./Species.css"; 
 
 const SpeciesPage: React.FC = () => {
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
   const [iucnList, setIucnList] = useState<Iucn[]>([]);
   const [referenceList, setReferenceList] = useState<Reference[]>([]);
-  const [regencyList, setRegencyList] = useState<any[]>([]);
-  const [wppList, setWppList] = useState<any[]>([]);
+  const [regencyList, setRegencyList] = useState<Regency[]>([]);
+  const [wppList, setWppList] = useState<Wpp[]>([]);
   
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [lookupError, setLookupError] = useState("");
   const [searchText, setSearchText] = useState<string>("");
   const [detailItem, setDetailItem] = useState<Species | null>(null);
 
@@ -64,7 +67,7 @@ const SpeciesPage: React.FC = () => {
   const [synonyms, setSynonyms] = useState<Array<{ scientificName: string; author: string; status: string }>>([]);
   const [localNames, setLocalNames] = useState<Array<{ name: string; regionNote: string }>>([]);
   const [photos, setPhotos] = useState<Array<{ filePath: string; caption: string; isPrimary: boolean }>>([]);
-  const [references, setReferences] = useState<Array<{ referenceId: number; isMainRef: boolean }>>([]);
+  const [references, setReferences] = useState<Array<{ referenceId: string; isMainRef: boolean }>>([]);
   const [wppIds, setWppIds] = useState<number[]>([]);
   const [regencyIds, setRegencyIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -107,7 +110,7 @@ const SpeciesPage: React.FC = () => {
   const [editSynonyms, setEditSynonyms] = useState<Array<{ scientificName: string; author: string; status: string }>>([]);
   const [editLocalNames, setEditLocalNames] = useState<Array<{ name: string; regionNote: string }>>([]);
   const [editPhotos, setEditPhotos] = useState<Array<{ filePath: string; caption: string; isPrimary: boolean }>>([]);
-  const [editReferences, setEditReferences] = useState<Array<{ referenceId: number; isMainRef: boolean }>>([]);
+  const [editReferences, setEditReferences] = useState<Array<{ referenceId: string; isMainRef: boolean }>>([]);
   const [editWppIds, setEditWppIds] = useState<number[]>([]);
   const [editRegencyIds, setEditRegencyIds] = useState<number[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -131,15 +134,25 @@ const SpeciesPage: React.FC = () => {
       const [speciesRes, iucnRes, referenceRes, regencyRes, wppRes] = results;
 
       if (speciesRes.status === "fulfilled") setSpeciesList(speciesRes.value.data || []);
-      if (iucnRes.status === "fulfilled") setIucnList(iucnRes.value.data || []);
-      if (referenceRes.status === "fulfilled") setReferenceList(referenceRes.value.data || []);
-      if (regencyRes.status === "fulfilled") setRegencyList(regencyRes.value.data || []);
-      if (wppRes.status === "fulfilled") setWppList(wppRes.value.data || []);
+      else setError(getApiErrorMessage(speciesRes.reason, "Gagal memuat data spesies."));
 
-      const failedRequest = results.find((result) => result.status === "rejected");
-      if (failedRequest?.status === "rejected") throw failedRequest.reason;
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Gagal memuat data dari server.");
+      const failures: string[] = [];
+      if (iucnRes.status === "fulfilled") setIucnList(iucnRes.value.data || []);
+      else if (isEmptyMasterList(iucnRes.reason, "iucn")) setIucnList([]);
+      else failures.push(`IUCN: ${getApiErrorMessage(iucnRes.reason, "Gagal memuat IUCN.")}`);
+      if (referenceRes.status === "fulfilled") setReferenceList(referenceRes.value.data || []);
+      else failures.push(`Referensi: ${getApiErrorMessage(referenceRes.reason, "Gagal memuat referensi.")}`);
+      if (regencyRes.status === "fulfilled") setRegencyList(regencyRes.value.data || []);
+      else failures.push(`Daerah: ${getApiErrorMessage(regencyRes.reason, "Gagal memuat daerah.")}`);
+      if (wppRes.status === "fulfilled") setWppList(wppRes.value.data || []);
+      else if (isEmptyMasterList(wppRes.reason, "wpp")) setWppList([]);
+      else failures.push(`WPP: ${getApiErrorMessage(wppRes.reason, "Gagal memuat WPP.")}`);
+      const iucnEmpty = iucnRes.status === "fulfilled" ? !iucnRes.value.data?.length :
+        iucnRes.status === "rejected" && isEmptyMasterList(iucnRes.reason, "iucn");
+      setLookupError(failures.length ? `Lookup pendukung belum lengkap. ${failures.join(" ")} Tambah/edit dinonaktifkan.` :
+        iucnEmpty ? "Belum ada IUCN. Tambah/edit dinonaktifkan sampai data IUCN tersedia." : "");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Gagal memuat data dari server."));
     } finally {
       setLoading(false);
     }
@@ -159,8 +172,11 @@ const SpeciesPage: React.FC = () => {
     );
   }, [speciesList, searchText]);
 
+  const canUseSpeciesForm = !loading && !error && !lookupError && iucnList.length > 0;
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canUseSpeciesForm) return;
     if (!commonName.trim() || !scientificName.trim() || !iucnStatusId) return;
 
     setIsSubmitting(true);
@@ -211,14 +227,15 @@ const SpeciesPage: React.FC = () => {
       resetForm();
       setIsModalOpen(false);
       fetchData(); 
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Gagal menyimpan data Spesies");
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Gagal menyimpan data Spesies"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const openEditModal = (item: Species) => {
+    if (!canUseSpeciesForm) return;
     setEditingId(item.id);
     setEditCommonName(item.commonName);
     setEditScientificName(item.scientificName);
@@ -268,17 +285,18 @@ const SpeciesPage: React.FC = () => {
       isPrimary: Boolean(photo.isPrimary),
     })));
     setEditReferences((item.references || []).map((entry) => ({
-      referenceId: Number(entry.referenceId ?? entry.reference?.id ?? 0),
+      referenceId: String(entry.referenceId ?? entry.reference?.id ?? ""),
       isMainRef: Boolean(entry.isMainRef),
     })));
-    setEditWppIds(item.wppZones?.map((w: any) => w.wppZoneId || w.id) || []);
-    setEditRegencyIds(item.regencies?.map((r: any) => r.regencyId || r.id) || []);
+    setEditWppIds(item.wppZones?.map((w) => (w.wppZoneId || w.id) as number) || []);
+    setEditRegencyIds(item.regencies?.map((r) => (r.regencyId || r.id) as number) || []);
     
     setIsEditModalOpen(true);
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canUseSpeciesForm) return;
     if (!editingId || !editCommonName.trim() || !editScientificName.trim() || !editIucnStatusId) return;
 
     setIsEditing(true);
@@ -328,8 +346,8 @@ const SpeciesPage: React.FC = () => {
       setToastMessage("Data Spesies berhasil diperbarui");
       setIsEditModalOpen(false);
       fetchData(); 
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Gagal memperbarui data Spesies");
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Gagal memperbarui data Spesies"));
     } finally {
       setIsEditing(false);
     }
@@ -341,8 +359,8 @@ const SpeciesPage: React.FC = () => {
       await deleteSpecies(deletingId);
       setToastMessage("Data Spesies berhasil dihapus");
       fetchData(); 
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Gagal menghapus data Spesies");
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Gagal menghapus data Spesies"));
     } finally {
       setDeletingId(null);
     }
@@ -398,69 +416,72 @@ const SpeciesPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="ion-padding">
-        <IonSearchbar
-          value={searchText}
-          onIonInput={(e) => setSearchText(e.detail.value!)}
-          placeholder="Cari nama spesies..."
-          className="species-searchbar"
-        />
-
-        <div className="species-header-container">
-          <h2 className="species-title">Data Spesies</h2>
-          <IonButton onClick={() => setIsModalOpen(true)}>
-            <IonIcon slot="start" icon={addOutline} />
+      <div className="admin-species-page">
+        <div className="species-toolbar">
+          <IonSearchbar
+            value={searchText}
+            onIonInput={(e) => setSearchText(e.detail.value!)}
+            placeholder="Cari nama spesies..."
+            aria-label="Cari nama spesies"
+            className="species-searchbar"
+          />
+          <IonButton className="species-add-button" disabled={!canUseSpeciesForm} fill="clear" onClick={() => setIsModalOpen(true)}>
             Tambah Data
+            <img slot="end" src="/assets/admin/species-add.svg" alt="" />
           </IonButton>
         </div>
 
+        {!loading && !error && lookupError && <div className="species-message-container" role="alert">
+          <p>{lookupError}</p><IonButton fill="outline" onClick={fetchData}>Muat ulang lookup</IonButton>
+        </div>}
         {loading ? (
-          <div className="species-loading-container">
+          <div className="species-loading-container" role="status">
             <IonSpinner name="crescent" />
             <p><IonText color="medium">Memuat data...</IonText></p>
           </div>
         ) : error ? (
-          <div className="species-message-container">
-            <IonText color="danger">{error}</IonText>
+          <div className="species-message-container species-error-state">
+            <p role="alert"><IonText color="danger">{error}</IonText></p>
+            <IonButton fill="outline" onClick={fetchData}>Coba lagi</IonButton>
           </div>
         ) : filteredSpecies.length === 0 ? (
           <div className="species-message-container">
-            <IonText color="medium">Data Spesies tidak ditemukan.</IonText>
+            <IonText color="medium">{speciesList.length === 0 ? "Belum ada spesies terdaftar." : "Tidak ada spesies yang cocok dengan pencarian."}</IonText>
           </div>
         ) : (
-          <div className="species-table-wrapper">
-            <table className="species-table">
+          <div className="species-table-wrapper" role="region" aria-label="Daftar spesies" tabIndex={0}>
+            <table className="species-table" aria-label="Data spesies">
               <thead>
                 <tr className="species-table-header-row">
-                  <th className="species-table-th">No</th>
-                  <th className="species-table-th">Nama Umum</th>
-                  <th className="species-table-th">Nama Ilmiah</th>
-                  <th className="species-table-th">Status IUCN</th>
-                  <th className="species-table-th species-text-center">Aksi</th>
+                  <th scope="col" className="species-table-th">Nama Umum</th>
+                  <th scope="col" className="species-table-th">Nama Ilmiah</th>
+                  <th scope="col" className="species-table-th">Status IUCN</th>
+                  <th scope="col" className="species-table-th species-text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredSpecies.map((item, index) => (
+                {filteredSpecies.map((item) => (
                   <tr key={item.id} className="species-table-row">
-                    <td className="species-table-td">{index + 1}</td>
                     <td className="species-table-td">{item.commonName}</td>
                     <td className="species-table-td"><em>{item.scientificName}</em></td>
                     <td className="species-table-td">
-                      <IonBadge color="primary">{getIucnCode(item.iucnStatusId)}</IonBadge>
+                      <span className="species-iucn-code">{getIucnCode(item.iucnStatusId)}</span>
                     </td>
                     <td className="species-table-td species-text-center">
-                      <IonButton fill="clear" size="small" aria-label={`Lihat detail ${item.commonName}`} onClick={() => setDetailItem(item)}>
-                        <IonIcon slot="icon-only" icon={eyeOutline} />
-                      </IonButton>
-                      <IonButton fill="clear" size="small" color="warning" onClick={() => openEditModal(item)}>
-                        <IonIcon slot="icon-only" icon={pencilOutline} />
-                      </IonButton>
-                      <IonButton fill="clear" size="small" color="danger" onClick={() => {
-                          setDeletingId(item.id);
-                          setIsAlertDeleteOpen(true);
-                      }}>
-                        <IonIcon slot="icon-only" icon={trashOutline} />
-                      </IonButton>
+                      <div className="species-row-actions">
+                        <IonButton className="species-action-button" fill="clear" aria-label={`Lihat detail ${item.commonName}`} onClick={() => setDetailItem(item)}>
+                          <img src="/assets/admin/species-eye.svg" alt="" />
+                        </IonButton>
+                        <IonButton className="species-action-button" fill="clear" aria-label={`Edit ${item.commonName}`} disabled={!canUseSpeciesForm} onClick={() => openEditModal(item)}>
+                          <img src="/assets/admin/species-edit.svg" alt="" />
+                        </IonButton>
+                        <IonButton className="species-action-button" fill="clear" color="danger" aria-label={`Hapus ${item.commonName}`} onClick={() => {
+                            setDeletingId(item.id);
+                            setIsAlertDeleteOpen(true);
+                        }}>
+                          <img src="/assets/admin/species-delete.svg" alt="" />
+                        </IonButton>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -486,7 +507,7 @@ const SpeciesPage: React.FC = () => {
           { label: "Lingkungan", value: detailItem.environment || "-" },
           { label: "Zona Iklim", value: detailItem.climateZone || "-" },
           { label: "Kedalaman (m)", value: `${detailItem.depthMinMeters ?? "-"} - ${detailItem.depthMaxMeters ?? "-"}` },
-          { label: "Suhu (°C)", value: `${detailItem.tempMinC ?? "-"} - ${detailItem.tempMaxC ?? "-"}` },
+          { label: "Suhu (Ã‚Â°C)", value: `${detailItem.tempMinC ?? "-"} - ${detailItem.tempMaxC ?? "-"}` },
           { label: "Distribusi", value: detailItem.distributionText || "-" },
           { label: "Panjang Maksimum (cm)", value: detailItem.maxLengthCm ?? "-" },
           { label: "Tipe Panjang", value: detailItem.lengthType || "-" },
@@ -519,48 +540,50 @@ const SpeciesPage: React.FC = () => {
       />
 
       {/* Modal Tambah Data */}
-      <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
+      <IonModal className="admin-form-modal admin-form-modal--wide" aria-label="Tambah Data Spesies" aria-labelledby="species-create-title" isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Tambah Data Spesies</IonTitle>
+            <IonTitle id="species-create-title">Tambah Data Spesies</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleCreate}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Nama Umum</IonLabel>
-              <IonInput value={commonName} onIonInput={(e) => setCommonName(e.detail.value!)} required />
+              <IonInput aria-label="Nama Umum" value={commonName} onIonInput={(e) => setCommonName(e.detail.value!)} required />
             </IonItem>
             <IonItem>
               <IonLabel position="stacked">Nama Ilmiah</IonLabel>
-              <IonInput value={scientificName} onIonInput={(e) => setScientificName(e.detail.value!)} required />
+              <IonInput aria-label="Nama Ilmiah" value={scientificName} onIonInput={(e) => setScientificName(e.detail.value!)} required />
             </IonItem>
             <div className="species-form-section">
               <h3>Identitas Taksonomi</h3>
               <IonItem>
                 <IonLabel position="stacked">Penulis / Author</IonLabel>
-                <IonInput value={author} onIonInput={(e) => setAuthor(e.detail.value!)} />
+                <IonInput aria-label="Penulis / Author" value={author} onIonInput={(e) => setAuthor(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Etimologi</IonLabel>
-                <IonInput value={etymology} onIonInput={(e) => setEtymology(e.detail.value!)} />
+                <IonInput aria-label="Etimologi" value={etymology} onIonInput={(e) => setEtymology(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ordo</IonLabel>
-                <IonInput value={order} onIonInput={(e) => setOrder(e.detail.value!)} />
+                <IonInput aria-label="Ordo" value={order} onIonInput={(e) => setOrder(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Famili</IonLabel>
-                <IonInput value={family} onIonInput={(e) => setFamily(e.detail.value!)} />
+                <IonInput aria-label="Famili" value={family} onIonInput={(e) => setFamily(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Genus</IonLabel>
-                <IonInput value={genus} onIonInput={(e) => setGenus(e.detail.value!)} />
+                <IonInput aria-label="Genus" value={genus} onIonInput={(e) => setGenus(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -568,31 +591,31 @@ const SpeciesPage: React.FC = () => {
               <h3>Habitat dan Distribusi</h3>
               <IonItem>
                 <IonLabel position="stacked">Lingkungan</IonLabel>
-                <IonInput value={environment} onIonInput={(e) => setEnvironment(e.detail.value!)} />
+                <IonInput aria-label="Lingkungan" value={environment} onIonInput={(e) => setEnvironment(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Zona Iklim</IonLabel>
-                <IonInput value={climateZone} onIonInput={(e) => setClimateZone(e.detail.value!)} />
+                <IonInput aria-label="Zona Iklim" value={climateZone} onIonInput={(e) => setClimateZone(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Kedalaman Minimum (m)</IonLabel>
-                <IonInput value={depthMinMeters} type="number" onIonInput={(e) => setDepthMinMeters(e.detail.value || "")} />
+                <IonInput aria-label="Kedalaman Minimum (m)" value={depthMinMeters} type="number" onIonInput={(e) => setDepthMinMeters(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Kedalaman Maksimum (m)</IonLabel>
-                <IonInput value={depthMaxMeters} type="number" onIonInput={(e) => setDepthMaxMeters(e.detail.value || "")} />
+                <IonInput aria-label="Kedalaman Maksimum (m)" value={depthMaxMeters} type="number" onIonInput={(e) => setDepthMaxMeters(e.detail.value || "")} />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Suhu Minimum (°C)</IonLabel>
-                <IonInput value={tempMinC} type="number" onIonInput={(e) => setTempMinC(e.detail.value || "")} />
+                <IonLabel position="stacked">Suhu Minimum (Ã‚Â°C)</IonLabel>
+                <IonInput aria-label="Suhu Minimum (Ã‚Â°C)" value={tempMinC} type="number" onIonInput={(e) => setTempMinC(e.detail.value || "")} />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Suhu Maksimum (°C)</IonLabel>
-                <IonInput value={tempMaxC} type="number" onIonInput={(e) => setTempMaxC(e.detail.value || "")} />
+                <IonLabel position="stacked">Suhu Maksimum (Ã‚Â°C)</IonLabel>
+                <IonInput aria-label="Suhu Maksimum (Ã‚Â°C)" value={tempMaxC} type="number" onIonInput={(e) => setTempMaxC(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Distribusi</IonLabel>
-                <IonInput value={distributionText} onIonInput={(e) => setDistributionText(e.detail.value!)} />
+                <IonInput aria-label="Distribusi" value={distributionText} onIonInput={(e) => setDistributionText(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -600,43 +623,43 @@ const SpeciesPage: React.FC = () => {
               <h3>Ukuran dan Morfologi</h3>
               <IonItem>
                 <IonLabel position="stacked">Panjang Maksimum (cm)</IonLabel>
-                <IonInput value={maxLengthCm} type="number" onIonInput={(e) => setMaxLengthCm(e.detail.value || "")} />
+                <IonInput aria-label="Panjang Maksimum (cm)" value={maxLengthCm} type="number" onIonInput={(e) => setMaxLengthCm(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Tipe Panjang</IonLabel>
-                <IonInput value={lengthType} onIonInput={(e) => setLengthType(e.detail.value!)} />
+                <IonInput aria-label="Tipe Panjang" value={lengthType} onIonInput={(e) => setLengthType(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Berat Maksimum (kg)</IonLabel>
-                <IonInput value={maxWeightKg} type="number" onIonInput={(e) => setMaxWeightKg(e.detail.value || "")} />
+                <IonInput aria-label="Berat Maksimum (kg)" value={maxWeightKg} type="number" onIonInput={(e) => setMaxWeightKg(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Umur Maksimum (tahun)</IonLabel>
-                <IonInput value={maxAgeYears} type="number" onIonInput={(e) => setMaxAgeYears(e.detail.value || "")} />
+                <IonInput aria-label="Umur Maksimum (tahun)" value={maxAgeYears} type="number" onIonInput={(e) => setMaxAgeYears(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Dorsal Spines</IonLabel>
-                <IonInput value={dorsalSpines} onIonInput={(e) => setDorsalSpines(e.detail.value!)} />
+                <IonInput aria-label="Dorsal Spines" value={dorsalSpines} onIonInput={(e) => setDorsalSpines(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Dorsal Soft Rays</IonLabel>
-                <IonInput value={dorsalSoftRays} onIonInput={(e) => setDorsalSoftRays(e.detail.value!)} />
+                <IonInput aria-label="Dorsal Soft Rays" value={dorsalSoftRays} onIonInput={(e) => setDorsalSoftRays(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Anal Spines</IonLabel>
-                <IonInput value={analSpines} onIonInput={(e) => setAnalSpines(e.detail.value!)} />
+                <IonInput aria-label="Anal Spines" value={analSpines} onIonInput={(e) => setAnalSpines(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Anal Soft Rays</IonLabel>
-                <IonInput value={analSoftRays} onIonInput={(e) => setAnalSoftRays(e.detail.value!)} />
+                <IonInput aria-label="Anal Soft Rays" value={analSoftRays} onIonInput={(e) => setAnalSoftRays(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Bentuk Tubuh</IonLabel>
-                <IonInput value={bodyShape} onIonInput={(e) => setBodyShape(e.detail.value!)} />
+                <IonInput aria-label="Bentuk Tubuh" value={bodyShape} onIonInput={(e) => setBodyShape(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Deskripsi Morfologi</IonLabel>
-                <IonInput value={morphologyText} onIonInput={(e) => setMorphologyText(e.detail.value!)} />
+                <IonInput aria-label="Deskripsi Morfologi" value={morphologyText} onIonInput={(e) => setMorphologyText(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -644,23 +667,23 @@ const SpeciesPage: React.FC = () => {
               <h3>Biologi dan Konservasi</h3>
               <IonItem>
                 <IonLabel position="stacked">Biologi</IonLabel>
-                <IonInput value={biologyText} onIonInput={(e) => setBiologyText(e.detail.value!)} />
+                <IonInput aria-label="Biologi" value={biologyText} onIonInput={(e) => setBiologyText(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Fekunditas</IonLabel>
-                <IonInput value={fecundityText} onIonInput={(e) => setFecundityText(e.detail.value!)} />
+                <IonInput aria-label="Fekunditas" value={fecundityText} onIonInput={(e) => setFecundityText(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ancaman terhadap Manusia</IonLabel>
-                <IonInput value={threatToHumans} onIonInput={(e) => setThreatToHumans(e.detail.value!)} />
+                <IonInput aria-label="Ancaman terhadap Manusia" value={threatToHumans} onIonInput={(e) => setThreatToHumans(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Pentingnya dalam Perikanan</IonLabel>
-                <IonInput value={fisheriesImportance} onIonInput={(e) => setFisheriesImportance(e.detail.value!)} />
+                <IonInput aria-label="Pentingnya dalam Perikanan" value={fisheriesImportance} onIonInput={(e) => setFisheriesImportance(e.detail.value!)} />
               </IonItem>
-              <IonItem>
+              <IonItem className="admin-form-modal__required">
                 <IonLabel position="stacked">Status IUCN</IonLabel>
-                <IonSelect value={iucnStatusId} onIonChange={(e) => setIucnStatusId(e.detail.value)} placeholder="Pilih IUCN">
+                <IonSelect aria-required="true" interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Status IUCN" value={iucnStatusId} onIonChange={(e) => setIucnStatusId(e.detail.value)} placeholder="Pilih IUCN">
                   {iucnList.map(iucn => (
                     <IonSelectOption key={iucn.id} value={iucn.id}>{iucn.code} - {iucn.name}</IonSelectOption>
                   ))}
@@ -668,19 +691,19 @@ const SpeciesPage: React.FC = () => {
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Tanggal Penilaian IUCN</IonLabel>
-                <IonInput value={iucnAssessedAt} type="date" onIonInput={(e) => setIucnAssessedAt(e.detail.value || "")} />
+                <IonInput aria-label="Tanggal Penilaian IUCN" value={iucnAssessedAt} type="date" onIonInput={(e) => setIucnAssessedAt(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Status CITES</IonLabel>
-                <IonInput value={citesStatus} onIonInput={(e) => setCitesStatus(e.detail.value!)} />
+                <IonInput aria-label="Status CITES" value={citesStatus} onIonInput={(e) => setCitesStatus(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Status CMS</IonLabel>
-                <IonInput value={cmsStatus} onIonInput={(e) => setCmsStatus(e.detail.value!)} />
+                <IonInput aria-label="Status CMS" value={cmsStatus} onIonInput={(e) => setCmsStatus(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ikan Gamefish</IonLabel>
-                <IonSelect value={isGamefish} onIonChange={(e) => setIsGamefish(Boolean(e.detail.value))} placeholder="Pilih status">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Ikan Gamefish" value={isGamefish} onIonChange={(e) => setIsGamefish(Boolean(e.detail.value))} placeholder="Pilih status">
                   <IonSelectOption value={true}>Ya</IonSelectOption>
                   <IonSelectOption value={false}>Tidak</IonSelectOption>
                 </IonSelect>
@@ -693,15 +716,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Nama ilmiah</IonLabel>
-                    <IonInput value={synonym.scientificName} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, scientificName: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Nama ilmiah" value={synonym.scientificName} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, scientificName: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Penulis</IonLabel>
-                    <IonInput value={synonym.author} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, author: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Penulis" value={synonym.author} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, author: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Status</IonLabel>
-                    <IonInput value={synonym.status} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, status: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Status" value={synonym.status} onIonInput={(e) => setSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, status: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonButton fill="clear" color="danger" onClick={() => setSynonyms((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
@@ -715,11 +738,11 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Nama</IonLabel>
-                    <IonInput value={localName.name} onIonInput={(e) => setLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Nama" value={localName.name} onIonInput={(e) => setLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Catatan daerah</IonLabel>
-                    <IonInput value={localName.regionNote} onIonInput={(e) => setLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, regionNote: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Catatan daerah" value={localName.regionNote} onIonInput={(e) => setLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, regionNote: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonButton fill="clear" color="danger" onClick={() => setLocalNames((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
@@ -733,15 +756,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Referensi</IonLabel>
-                    <IonSelect value={reference.referenceId} onIonChange={(e) => setReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, referenceId: Number(e.detail.value) } : item))} placeholder="Pilih referensi">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Referensi" value={reference.referenceId} onIonChange={(e) => setReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, referenceId: String(e.detail.value ?? "") } : item))} placeholder="Pilih referensi">
                       {referenceList.map((item) => (
-                        <IonSelectOption key={item.id} value={Number(item.id)}>{item.title} ({item.authors})</IonSelectOption>
+                        <IonSelectOption key={item.id} value={String(item.id)}>{item.title} ({item.authors})</IonSelectOption>
                       ))}
                     </IonSelect>
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Referensi utama</IonLabel>
-                    <IonSelect value={reference.isMainRef} onIonChange={(e) => setReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isMainRef: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Referensi utama" value={reference.isMainRef} onIonChange={(e) => setReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isMainRef: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
                       <IonSelectOption value={true}>Ya</IonSelectOption>
                       <IonSelectOption value={false}>Tidak</IonSelectOption>
                     </IonSelect>
@@ -749,7 +772,7 @@ const SpeciesPage: React.FC = () => {
                   <IonButton fill="clear" color="danger" onClick={() => setReferences((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
               ))}
-              <IonButton fill="clear" onClick={() => setReferences((current) => [...current, { referenceId: 0, isMainRef: false }])}>Tambah Referensi</IonButton>
+              <IonButton fill="clear" onClick={() => setReferences((current) => [...current, { referenceId: "", isMainRef: false }])}>Tambah Referensi</IonButton>
             </div>
 
             <div className="species-form-section">
@@ -758,15 +781,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">URL atau path foto</IonLabel>
-                    <IonInput value={photo.filePath} onIonInput={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, filePath: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="URL atau path foto" value={photo.filePath} onIonInput={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, filePath: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Keterangan</IonLabel>
-                    <IonInput value={photo.caption} onIonInput={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, caption: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Keterangan" value={photo.caption} onIonInput={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, caption: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Foto utama</IonLabel>
-                    <IonSelect value={photo.isPrimary} onIonChange={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isPrimary: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Foto utama" value={photo.isPrimary} onIonChange={(e) => setPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isPrimary: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
                       <IonSelectOption value={true}>Ya</IonSelectOption>
                       <IonSelectOption value={false}>Tidak</IonSelectOption>
                     </IonSelect>
@@ -781,7 +804,7 @@ const SpeciesPage: React.FC = () => {
               <h3>Wilayah</h3>
               <IonItem>
                 <IonLabel position="stacked">Wilayah WPP</IonLabel>
-                <IonSelect multiple={true} value={wppIds} onIonChange={(e) => setWppIds(e.detail.value)} placeholder="Pilih WPP">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Wilayah WPP" multiple={true} value={wppIds} onIonChange={(e) => setWppIds(e.detail.value)} placeholder="Pilih WPP">
                   {wppList.map(wpp => (
                     <IonSelectOption key={wpp.id} value={wpp.id}>{wpp.code}</IonSelectOption>
                   ))}
@@ -789,66 +812,69 @@ const SpeciesPage: React.FC = () => {
               </IonItem>
               <IonItem className="species-form-item">
                 <IonLabel position="stacked">Kabupaten/Kota</IonLabel>
-                <IonSelect multiple={true} value={regencyIds} onIonChange={(e) => setRegencyIds(e.detail.value)} placeholder="Pilih Wilayah">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Kabupaten/Kota" multiple={true} value={regencyIds} onIonChange={(e) => setRegencyIds(e.detail.value)} placeholder="Pilih Wilayah">
                   {regencyList.map(reg => (
                     <IonSelectOption key={reg.id} value={reg.id}>{reg.name}</IonSelectOption>
                   ))}
                 </IonSelect>
               </IonItem>
             </div>
+            </div>
             <div className="species-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsModalOpen(false)}>Batal</IonButton>
-              <IonButton type="submit" disabled={isSubmitting}>
+              <IonButton type="submit" disabled={isSubmitting || !canUseSpeciesForm}>
                 {isSubmitting ? "Menyimpan..." : "Simpan"}
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       {/* Modal Edit Data */}
-      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
+      <IonModal className="admin-form-modal admin-form-modal--wide" aria-label="Edit Data Spesies" aria-labelledby="species-edit-title" isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Edit Data Spesies</IonTitle>
+            <IonTitle id="species-edit-title">Edit Data Spesies</IonTitle>
             <IonButtons slot="end">
-              <IonButton onClick={() => setIsEditModalOpen(false)}>
+              <IonButton aria-label="Tutup form" onClick={() => setIsEditModalOpen(false)}>
                 <IonIcon icon={closeOutline} />
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <div className="admin-form-modal__body">
           <form onSubmit={handleEdit}>
+            <div className="admin-form-modal__fields">
+              <p className="admin-form-modal__hint">Kolom bertanda * wajib diisi.</p>
             <IonItem>
               <IonLabel position="stacked">Nama Umum</IonLabel>
-              <IonInput value={editCommonName} onIonInput={(e) => setEditCommonName(e.detail.value!)} required />
+              <IonInput aria-label="Nama Umum" value={editCommonName} onIonInput={(e) => setEditCommonName(e.detail.value!)} required />
             </IonItem>
             <IonItem>
               <IonLabel position="stacked">Nama Ilmiah</IonLabel>
-              <IonInput value={editScientificName} onIonInput={(e) => setEditScientificName(e.detail.value!)} required />
+              <IonInput aria-label="Nama Ilmiah" value={editScientificName} onIonInput={(e) => setEditScientificName(e.detail.value!)} required />
             </IonItem>
             <div className="species-form-section">
               <h3>Identitas Taksonomi</h3>
               <IonItem>
                 <IonLabel position="stacked">Penulis / Author</IonLabel>
-                <IonInput value={editAuthor} onIonInput={(e) => setEditAuthor(e.detail.value!)} />
+                <IonInput aria-label="Penulis / Author" value={editAuthor} onIonInput={(e) => setEditAuthor(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Etimologi</IonLabel>
-                <IonInput value={editEtymology} onIonInput={(e) => setEditEtymology(e.detail.value!)} />
+                <IonInput aria-label="Etimologi" value={editEtymology} onIonInput={(e) => setEditEtymology(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ordo</IonLabel>
-                <IonInput value={editOrder} onIonInput={(e) => setEditOrder(e.detail.value!)} />
+                <IonInput aria-label="Ordo" value={editOrder} onIonInput={(e) => setEditOrder(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Famili</IonLabel>
-                <IonInput value={editFamily} onIonInput={(e) => setEditFamily(e.detail.value!)} />
+                <IonInput aria-label="Famili" value={editFamily} onIonInput={(e) => setEditFamily(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Genus</IonLabel>
-                <IonInput value={editGenus} onIonInput={(e) => setEditGenus(e.detail.value!)} />
+                <IonInput aria-label="Genus" value={editGenus} onIonInput={(e) => setEditGenus(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -856,31 +882,31 @@ const SpeciesPage: React.FC = () => {
               <h3>Habitat dan Distribusi</h3>
               <IonItem>
                 <IonLabel position="stacked">Lingkungan</IonLabel>
-                <IonInput value={editEnvironment} onIonInput={(e) => setEditEnvironment(e.detail.value!)} />
+                <IonInput aria-label="Lingkungan" value={editEnvironment} onIonInput={(e) => setEditEnvironment(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Zona Iklim</IonLabel>
-                <IonInput value={editClimateZone} onIonInput={(e) => setEditClimateZone(e.detail.value!)} />
+                <IonInput aria-label="Zona Iklim" value={editClimateZone} onIonInput={(e) => setEditClimateZone(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Kedalaman Minimum (m)</IonLabel>
-                <IonInput value={editDepthMinMeters} type="number" onIonInput={(e) => setEditDepthMinMeters(e.detail.value || "")} />
+                <IonInput aria-label="Kedalaman Minimum (m)" value={editDepthMinMeters} type="number" onIonInput={(e) => setEditDepthMinMeters(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Kedalaman Maksimum (m)</IonLabel>
-                <IonInput value={editDepthMaxMeters} type="number" onIonInput={(e) => setEditDepthMaxMeters(e.detail.value || "")} />
+                <IonInput aria-label="Kedalaman Maksimum (m)" value={editDepthMaxMeters} type="number" onIonInput={(e) => setEditDepthMaxMeters(e.detail.value || "")} />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Suhu Minimum (°C)</IonLabel>
-                <IonInput value={editTempMinC} type="number" onIonInput={(e) => setEditTempMinC(e.detail.value || "")} />
+                <IonLabel position="stacked">Suhu Minimum (Ã‚Â°C)</IonLabel>
+                <IonInput aria-label="Suhu Minimum (Ã‚Â°C)" value={editTempMinC} type="number" onIonInput={(e) => setEditTempMinC(e.detail.value || "")} />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Suhu Maksimum (°C)</IonLabel>
-                <IonInput value={editTempMaxC} type="number" onIonInput={(e) => setEditTempMaxC(e.detail.value || "")} />
+                <IonLabel position="stacked">Suhu Maksimum (Ã‚Â°C)</IonLabel>
+                <IonInput aria-label="Suhu Maksimum (Ã‚Â°C)" value={editTempMaxC} type="number" onIonInput={(e) => setEditTempMaxC(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Distribusi</IonLabel>
-                <IonInput value={editDistributionText} onIonInput={(e) => setEditDistributionText(e.detail.value!)} />
+                <IonInput aria-label="Distribusi" value={editDistributionText} onIonInput={(e) => setEditDistributionText(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -888,43 +914,43 @@ const SpeciesPage: React.FC = () => {
               <h3>Ukuran dan Morfologi</h3>
               <IonItem>
                 <IonLabel position="stacked">Panjang Maksimum (cm)</IonLabel>
-                <IonInput value={editMaxLengthCm} type="number" onIonInput={(e) => setEditMaxLengthCm(e.detail.value || "")} />
+                <IonInput aria-label="Panjang Maksimum (cm)" value={editMaxLengthCm} type="number" onIonInput={(e) => setEditMaxLengthCm(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Tipe Panjang</IonLabel>
-                <IonInput value={editLengthType} onIonInput={(e) => setEditLengthType(e.detail.value!)} />
+                <IonInput aria-label="Tipe Panjang" value={editLengthType} onIonInput={(e) => setEditLengthType(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Berat Maksimum (kg)</IonLabel>
-                <IonInput value={editMaxWeightKg} type="number" onIonInput={(e) => setEditMaxWeightKg(e.detail.value || "")} />
+                <IonInput aria-label="Berat Maksimum (kg)" value={editMaxWeightKg} type="number" onIonInput={(e) => setEditMaxWeightKg(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Umur Maksimum (tahun)</IonLabel>
-                <IonInput value={editMaxAgeYears} type="number" onIonInput={(e) => setEditMaxAgeYears(e.detail.value || "")} />
+                <IonInput aria-label="Umur Maksimum (tahun)" value={editMaxAgeYears} type="number" onIonInput={(e) => setEditMaxAgeYears(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Dorsal Spines</IonLabel>
-                <IonInput value={editDorsalSpines} onIonInput={(e) => setEditDorsalSpines(e.detail.value!)} />
+                <IonInput aria-label="Dorsal Spines" value={editDorsalSpines} onIonInput={(e) => setEditDorsalSpines(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Dorsal Soft Rays</IonLabel>
-                <IonInput value={editDorsalSoftRays} onIonInput={(e) => setEditDorsalSoftRays(e.detail.value!)} />
+                <IonInput aria-label="Dorsal Soft Rays" value={editDorsalSoftRays} onIonInput={(e) => setEditDorsalSoftRays(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Anal Spines</IonLabel>
-                <IonInput value={editAnalSpines} onIonInput={(e) => setEditAnalSpines(e.detail.value!)} />
+                <IonInput aria-label="Anal Spines" value={editAnalSpines} onIonInput={(e) => setEditAnalSpines(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Anal Soft Rays</IonLabel>
-                <IonInput value={editAnalSoftRays} onIonInput={(e) => setEditAnalSoftRays(e.detail.value!)} />
+                <IonInput aria-label="Anal Soft Rays" value={editAnalSoftRays} onIonInput={(e) => setEditAnalSoftRays(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Bentuk Tubuh</IonLabel>
-                <IonInput value={editBodyShape} onIonInput={(e) => setEditBodyShape(e.detail.value!)} />
+                <IonInput aria-label="Bentuk Tubuh" value={editBodyShape} onIonInput={(e) => setEditBodyShape(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Deskripsi Morfologi</IonLabel>
-                <IonInput value={editMorphologyText} onIonInput={(e) => setEditMorphologyText(e.detail.value!)} />
+                <IonInput aria-label="Deskripsi Morfologi" value={editMorphologyText} onIonInput={(e) => setEditMorphologyText(e.detail.value!)} />
               </IonItem>
             </div>
 
@@ -932,23 +958,23 @@ const SpeciesPage: React.FC = () => {
               <h3>Biologi dan Konservasi</h3>
               <IonItem>
                 <IonLabel position="stacked">Biologi</IonLabel>
-                <IonInput value={editBiologyText} onIonInput={(e) => setEditBiologyText(e.detail.value!)} />
+                <IonInput aria-label="Biologi" value={editBiologyText} onIonInput={(e) => setEditBiologyText(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Fekunditas</IonLabel>
-                <IonInput value={editFecundityText} onIonInput={(e) => setEditFecundityText(e.detail.value!)} />
+                <IonInput aria-label="Fekunditas" value={editFecundityText} onIonInput={(e) => setEditFecundityText(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ancaman terhadap Manusia</IonLabel>
-                <IonInput value={editThreatToHumans} onIonInput={(e) => setEditThreatToHumans(e.detail.value!)} />
+                <IonInput aria-label="Ancaman terhadap Manusia" value={editThreatToHumans} onIonInput={(e) => setEditThreatToHumans(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Pentingnya dalam Perikanan</IonLabel>
-                <IonInput value={editFisheriesImportance} onIonInput={(e) => setEditFisheriesImportance(e.detail.value!)} />
+                <IonInput aria-label="Pentingnya dalam Perikanan" value={editFisheriesImportance} onIonInput={(e) => setEditFisheriesImportance(e.detail.value!)} />
               </IonItem>
-              <IonItem>
+              <IonItem className="admin-form-modal__required">
                 <IonLabel position="stacked">Status IUCN</IonLabel>
-                <IonSelect value={editIucnStatusId} onIonChange={(e) => setEditIucnStatusId(e.detail.value)} placeholder="Pilih IUCN">
+                <IonSelect aria-required="true" interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Status IUCN" value={editIucnStatusId} onIonChange={(e) => setEditIucnStatusId(e.detail.value)} placeholder="Pilih IUCN">
                   {iucnList.map(iucn => (
                     <IonSelectOption key={iucn.id} value={iucn.id}>{iucn.code} - {iucn.name}</IonSelectOption>
                   ))}
@@ -956,19 +982,19 @@ const SpeciesPage: React.FC = () => {
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Tanggal Penilaian IUCN</IonLabel>
-                <IonInput value={editIucnAssessedAt} type="date" onIonInput={(e) => setEditIucnAssessedAt(e.detail.value || "")} />
+                <IonInput aria-label="Tanggal Penilaian IUCN" value={editIucnAssessedAt} type="date" onIonInput={(e) => setEditIucnAssessedAt(e.detail.value || "")} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Status CITES</IonLabel>
-                <IonInput value={editCitesStatus} onIonInput={(e) => setEditCitesStatus(e.detail.value!)} />
+                <IonInput aria-label="Status CITES" value={editCitesStatus} onIonInput={(e) => setEditCitesStatus(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Status CMS</IonLabel>
-                <IonInput value={editCmsStatus} onIonInput={(e) => setEditCmsStatus(e.detail.value!)} />
+                <IonInput aria-label="Status CMS" value={editCmsStatus} onIonInput={(e) => setEditCmsStatus(e.detail.value!)} />
               </IonItem>
               <IonItem>
                 <IonLabel position="stacked">Ikan Gamefish</IonLabel>
-                <IonSelect value={editIsGamefish} onIonChange={(e) => setEditIsGamefish(Boolean(e.detail.value))} placeholder="Pilih status">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Ikan Gamefish" value={editIsGamefish} onIonChange={(e) => setEditIsGamefish(Boolean(e.detail.value))} placeholder="Pilih status">
                   <IonSelectOption value={true}>Ya</IonSelectOption>
                   <IonSelectOption value={false}>Tidak</IonSelectOption>
                 </IonSelect>
@@ -981,15 +1007,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Nama ilmiah</IonLabel>
-                    <IonInput value={synonym.scientificName} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, scientificName: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Nama ilmiah" value={synonym.scientificName} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, scientificName: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Penulis</IonLabel>
-                    <IonInput value={synonym.author} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, author: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Penulis" value={synonym.author} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, author: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Status</IonLabel>
-                    <IonInput value={synonym.status} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, status: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Status" value={synonym.status} onIonInput={(e) => setEditSynonyms((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, status: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonButton fill="clear" color="danger" onClick={() => setEditSynonyms((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
@@ -1003,11 +1029,11 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Nama</IonLabel>
-                    <IonInput value={localName.name} onIonInput={(e) => setEditLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Nama" value={localName.name} onIonInput={(e) => setEditLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Catatan daerah</IonLabel>
-                    <IonInput value={localName.regionNote} onIonInput={(e) => setEditLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, regionNote: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Catatan daerah" value={localName.regionNote} onIonInput={(e) => setEditLocalNames((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, regionNote: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonButton fill="clear" color="danger" onClick={() => setEditLocalNames((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
@@ -1021,15 +1047,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">Referensi</IonLabel>
-                    <IonSelect value={reference.referenceId} onIonChange={(e) => setEditReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, referenceId: Number(e.detail.value) } : item))} placeholder="Pilih referensi">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Referensi" value={reference.referenceId} onIonChange={(e) => setEditReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, referenceId: String(e.detail.value ?? "") } : item))} placeholder="Pilih referensi">
                       {referenceList.map((item) => (
-                        <IonSelectOption key={item.id} value={Number(item.id)}>{item.title} ({item.authors})</IonSelectOption>
+                        <IonSelectOption key={item.id} value={String(item.id)}>{item.title} ({item.authors})</IonSelectOption>
                       ))}
                     </IonSelect>
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Referensi utama</IonLabel>
-                    <IonSelect value={reference.isMainRef} onIonChange={(e) => setEditReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isMainRef: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Referensi utama" value={reference.isMainRef} onIonChange={(e) => setEditReferences((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isMainRef: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
                       <IonSelectOption value={true}>Ya</IonSelectOption>
                       <IonSelectOption value={false}>Tidak</IonSelectOption>
                     </IonSelect>
@@ -1037,7 +1063,7 @@ const SpeciesPage: React.FC = () => {
                   <IonButton fill="clear" color="danger" onClick={() => setEditReferences((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Hapus</IonButton>
                 </div>
               ))}
-              <IonButton fill="clear" onClick={() => setEditReferences((current) => [...current, { referenceId: 0, isMainRef: false }])}>Tambah Referensi</IonButton>
+              <IonButton fill="clear" onClick={() => setEditReferences((current) => [...current, { referenceId: "", isMainRef: false }])}>Tambah Referensi</IonButton>
             </div>
 
             <div className="species-form-section">
@@ -1046,15 +1072,15 @@ const SpeciesPage: React.FC = () => {
                 <div key={index} className="species-related-row">
                   <IonItem>
                     <IonLabel position="stacked">URL atau path foto</IonLabel>
-                    <IonInput value={photo.filePath} onIonInput={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, filePath: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="URL atau path foto" value={photo.filePath} onIonInput={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, filePath: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Keterangan</IonLabel>
-                    <IonInput value={photo.caption} onIonInput={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, caption: e.detail.value || "" } : item))} />
+                    <IonInput aria-label="Keterangan" value={photo.caption} onIonInput={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, caption: e.detail.value || "" } : item))} />
                   </IonItem>
                   <IonItem>
                     <IonLabel position="stacked">Foto utama</IonLabel>
-                    <IonSelect value={photo.isPrimary} onIonChange={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isPrimary: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
+                    <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Foto utama" value={photo.isPrimary} onIonChange={(e) => setEditPhotos((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, isPrimary: Boolean(e.detail.value) } : item))} placeholder="Pilih status">
                       <IonSelectOption value={true}>Ya</IonSelectOption>
                       <IonSelectOption value={false}>Tidak</IonSelectOption>
                     </IonSelect>
@@ -1069,7 +1095,7 @@ const SpeciesPage: React.FC = () => {
               <h3>Wilayah</h3>
               <IonItem>
                 <IonLabel position="stacked">Wilayah WPP</IonLabel>
-                <IonSelect multiple={true} value={editWppIds} onIonChange={(e) => setEditWppIds(e.detail.value)} placeholder="Pilih WPP">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Wilayah WPP" multiple={true} value={editWppIds} onIonChange={(e) => setEditWppIds(e.detail.value)} placeholder="Pilih WPP">
                   {wppList.map(wpp => (
                     <IonSelectOption key={wpp.id} value={wpp.id}>{wpp.code}</IonSelectOption>
                   ))}
@@ -1077,21 +1103,22 @@ const SpeciesPage: React.FC = () => {
               </IonItem>
               <IonItem className="species-form-item">
                 <IonLabel position="stacked">Kabupaten/Kota</IonLabel>
-                <IonSelect multiple={true} value={editRegencyIds} onIonChange={(e) => setEditRegencyIds(e.detail.value)} placeholder="Pilih Wilayah">
+                <IonSelect interfaceOptions={{ cssClass: "admin-form-select-alert" }} aria-label="Kabupaten/Kota" multiple={true} value={editRegencyIds} onIonChange={(e) => setEditRegencyIds(e.detail.value)} placeholder="Pilih Wilayah">
                   {regencyList.map(reg => (
                     <IonSelectOption key={reg.id} value={reg.id}>{reg.name}</IonSelectOption>
                   ))}
                 </IonSelect>
               </IonItem>
             </div>
+            </div>
             <div className="species-form-actions">
               <IonButton fill="clear" color="medium" onClick={() => setIsEditModalOpen(false)}>Batal</IonButton>
-              <IonButton type="submit" disabled={isEditing}>
+              <IonButton type="submit" disabled={isEditing || !canUseSpeciesForm}>
                 {isEditing ? "Menyimpan..." : "Simpan Perubahan"}
               </IonButton>
             </div>
           </form>
-        </IonContent>
+        </div>
       </IonModal>
 
       <IonAlert

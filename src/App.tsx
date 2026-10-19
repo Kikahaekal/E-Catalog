@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, Route, useNavigate } from 'react-router-dom';
-import { 
-  IonApp, 
-  IonRouterOutlet, 
-  setupIonicReact,
-  IonMenu,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonListHeader,
-  IonMenuToggle
-} from '@ionic/react';
+import React from 'react';
+import { Navigate, Route } from 'react-router-dom';
+import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
+import { AdminSidebar } from './components/admin/AdminSidebar';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import LoginPage from './pages/Login';
+import NotFound from './pages/NotFound';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -52,86 +40,13 @@ import SpeciesSearchResultsPage from './pages/SpeciesSearchResults';
 import SpeciesDetailPage from './pages/SpeciesDetail';
 import FishSubmissionPage from './pages/FishSubmission';
 import FishSubmissionsAdminPage from './pages/Admin/FishSubmissions/FishSubmissions';
-import { logout } from './services/user';
-
-const AdminLogoutItem: React.FC = () => {
-  const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('role')?.toLowerCase() === 'admin');
-
-  useEffect(() => {
-    const updateRole = () => setIsAdmin(localStorage.getItem('role')?.toLowerCase() === 'admin');
-    window.addEventListener('admin-auth-changed', updateRole);
-    window.addEventListener('storage', updateRole);
-    return () => {
-      window.removeEventListener('admin-auth-changed', updateRole);
-      window.removeEventListener('storage', updateRole);
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    await logout().catch(() => undefined);
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    window.dispatchEvent(new Event('admin-auth-changed'));
-    navigate('/login', { replace: true });
-  };
-
-  if (!isAdmin) return null;
-
-  return (
-    <IonMenuToggle>
-      <IonItem button onClick={handleLogout}>
-        <IonLabel>Logout</IonLabel>
-      </IonItem>
-    </IonMenuToggle>
-  );
-};
 
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      {/* menu admin */}
-      <IonMenu menuId="admin-menu" contentId="main-content">
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Menu Admin</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList>
-            <IonItem routerLink="/admin" routerDirection="none">
-              <IonLabel>Dashboard Admin</IonLabel>
-            </IonItem>
-            <IonListHeader className="ion-padding-top">
-              <IonLabel>Master Data</IonLabel>
-            </IonListHeader>
-            <IonItem routerLink="/iucn" routerDirection="none">
-              <IonLabel>Data IUCN</IonLabel>
-            </IonItem>
-            <IonItem routerLink="/daerah" routerDirection="none">
-              <IonLabel>Data Daerah</IonLabel>
-            </IonItem>
-            <IonItem routerLink="/wpp" routerDirection="none">
-              <IonLabel>Data Zona WPP</IonLabel>
-            </IonItem>
-            <IonItem routerLink="/spesies" routerDirection="none">
-              <IonLabel>Data Spesies</IonLabel>
-            </IonItem>
-            <IonItem routerLink="/referensi" routerDirection="none">
-              <IonLabel>Data Referensi</IonLabel>
-            </IonItem>
-            <IonItem routerLink="/permintaan-ikan" routerDirection="none">
-              <IonLabel>Permintaan Nama Ikan</IonLabel>
-            </IonItem>
-            <IonItem className="ion-padding-top" routerLink="/home" routerDirection="none">
-              <IonLabel>Halaman Utama</IonLabel>
-            </IonItem>
-            <AdminLogoutItem />
-          </IonList>
-        </IonContent>
-      </IonMenu>
+      <AdminSidebar variant="drawer" />
 
       <IonRouterOutlet id="main-content">
         <Route path="/home" element={<Home />} />
@@ -176,6 +91,7 @@ const App: React.FC = () => (
           </AdminRoute>
         }/>
         <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<NotFound />} />
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
